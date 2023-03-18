@@ -5,11 +5,11 @@
         <div class="header">
           <h2 class="section">{{ isRegister ? "注册" : "登录" }}</h2>
           <span class="pull">
-            <span class="tip">{{ isRegister ? "已有账号?" : "没有账号?" }}</span>
+            <span class="tip">{{ isRegister ? "已有账号" : "没有账号" }}?</span>
             <el-link
               type="primary"
               :underline="false"
-              @click="toSign">{{ isRegister ? "点此登录" : "点此注册" }}</el-link>
+              @click="triggerSign">{{ isRegister ? "点此登录" : "点此注册" }}</el-link>
           </span>
         </div>
         <el-form class="data" status-icon :rules="rules" :model="form" ref="ruleForm">
@@ -79,10 +79,13 @@ export default {
     };
   },
   methods: {
-    toSign() {
+    triggerSign() {
       this.isRegister = !this.isRegister;
       this.form = {}
       this.$refs['ruleForm'].resetFields();
+    },
+    showMsg(message, type = 'warning') {
+      this.$message({ showClose: true, type, message })
     },
     // 登录或注册
     userSignInOrUp(formName) {
@@ -104,24 +107,13 @@ export default {
         password: this.form.password
       }
 
-      let msg = this.$message({
-        showClose: true
-      })
-
-      console.log(user);
-
       try {
         const { data } = await login(user);
-
-        console.log(data);
-
         if(data.code == 300) {
-          msg.type = 'error'
-          msg.message = data.msg
+          this.showMsg(data.msg, 'error')
         } else {
           this.$store.commit('setUser', data.data)
-          msg.type = 'success'
-          msg.message = '登录成功'
+          this.showMsg('登录成功', 'success')
 
           this.$router.replace('/')
         }
@@ -194,7 +186,7 @@ export default {
       width: 300px;
 
       .el-form-item__label {
-        font-size: 18px;
+        font-size: 16px;
 
         &::before {
           display: none;

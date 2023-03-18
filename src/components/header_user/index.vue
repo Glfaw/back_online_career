@@ -58,7 +58,7 @@ export default {
         });
 
         this.$store.commit('setUser', null);
-        this.$router.replace('/');
+        this.$router.replace('/login');
       }).catch(() => {
         this.$message({
           type: 'info',

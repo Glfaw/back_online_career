@@ -8,14 +8,14 @@
       :rules="rules"
       @submit.native.prevent
     >
-      <el-form-item prop="username">
+      <el-form-item>
         <el-input
           clearable
           size="small"
           maxlength="12"
           prefix-icon="el-icon-user"
           placeholder="请输入用户名"
-          v-model.trim="form.uname"
+          v-model.trim="form.username"
         ></el-input>
       </el-form-item>
       <el-form-item prop="phone">
@@ -46,25 +46,14 @@
         <el-button size="small" icon="el-icon-refresh" @click="resetSearch">重置</el-button>
       </el-form-item>
       <div>
-        <el-button
-          size="small"
-          type="primary"
-          icon="el-icon-circle-plus-outline"
-          >新增</el-button
-        >
-        <el-button size="small" type="danger" icon="el-icon-remove-outline"
-          >批量删除</el-button
-        >
-        <el-button size="small" type="info" icon="el-icon-download"
-          >导入</el-button
-        >
-        <el-button size="small" type="warning" icon="el-icon-upload2"
-          >导出</el-button
-        >
+        <el-button size="small" type="primary" icon="el-icon-circle-plus">新增</el-button>
+        <el-button size="small" type="danger" icon="el-icon-remove">批量删除</el-button>
+        <el-button size="small" type="info" icon="el-icon-download">导入</el-button>
+        <el-button size="small" type="warning" icon="el-icon-upload2">导出</el-button>
       </div>
     </el-form>
 
-    <el-table class="user_table" :data="tableData" border stripe>
+    <el-table class="user_table" header-cell-class-name="user_table_header" :data="tableData" border stripe>
       <el-table-column type="selection" width="40"></el-table-column>
       <el-table-column prop="id" label="ID" width="100"></el-table-column>
       <el-table-column label="角色" width="120">
@@ -83,10 +72,10 @@
       <el-table-column
         fixed="right"
         label="操作"
-        width="100">
+        width="200">
         <template slot-scope="scope">
-          <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-          <el-button type="text" size="small">编辑</el-button>
+          <el-button icon="el-icon-edit" type="success" size="mini" @click="handleClick(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-remove-outline" type="danger" size="mini">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -106,6 +95,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import { getRoleList, getAllUser, getSearchPagination } from "@/api/user";
 
 export default {
@@ -113,7 +103,7 @@ export default {
   data() {
     return {
       form: {
-        uname: "",
+        username: "",
         address: "",
         phone: "",
       },
@@ -128,10 +118,13 @@ export default {
     };
   },
   created() {
-    this.getRoles();
-    this.getUserList();
+    if(this.user) {
+      this.getRoles();
+      this.getUserList();
+    }
   },
   computed: {
+    ...mapState(['user']),
     searchFlag() {
       let searchKey = [this.form.uname, this.form.phone, this.form.address];
       return searchKey.some((item) => item);
@@ -164,6 +157,14 @@ export default {
     handleClick(row) {
       console.log(row);
     },
+    showMsg(message, type='info') {
+      this.$message({ type, message, showClose: true })
+    },
+    endErrorMsg(err, message) {
+      if(err.request.status == 500) {
+        this.$message({ type: 'error', message, showClose: true })
+      }
+    },
     async getRoles() {
       try {
         const { data } = await getRoleList();
@@ -172,23 +173,34 @@ export default {
           this.roles = data.data;
         }
       } catch (error) {
-        console.log(error.message);
+        this.endErrorMsg(error, '角色信息获取失败')
       }
     },
     async getUserList() {
       try {
         const { data } = await getAllUser();
-        console.log(data);
-        if(data.code == 200) {
-          this.tableData = data.data;
-          this.total = this.tableData.length;
+        
+        switch (data.code) {
+          case 200:
+            this.showMsg(`获取${data.msg}`, 'success')
+            break;
+          case 300:
+            this.showMsg('没有数据')
+            break;
+          default:
+            new Error('未知错误');
+            break;
         }
+
+        this.tableData = data.data;
+        this.total = this.tableData.length;
+
       } catch (error) {
-        console.log(error.message);
+        this.endErrorMsg(error, '用户信息获取失败')
       }
     },
     async getSearch() {
-      if (this.searchFlag) {
+      if (this.searchFlag && this.user) {
         const params = {
           pageNum: this.pageNum,
           pageSize: this.pageSize,
@@ -200,14 +212,12 @@ export default {
 
         try {
           const { data } = await getSearchPagination(params);
-          console.log(data);
           if(data.code == 200) {
-            // console.log(data, data.data);
             this.tableData = data.data.records;
             this.total = data.data.total;
           }
         } catch (error) {
-          console.log(error.message);
+          this.endErrorMsg(error, '搜索失败')
         }
       }
     },
@@ -215,7 +225,7 @@ export default {
 };
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .user_container {
   .user_form {
     margin-top: 15px;
@@ -232,6 +242,10 @@ export default {
 
   .user_table {
     margin-top: 50px;
+
+    /deep/ .user_table_header {
+      background-color: #f1f3f5;
+    }
   }
 
   .user_pagination {
