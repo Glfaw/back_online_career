@@ -8,7 +8,7 @@
     :collapse-transition="false"
     :collapse="isCollapse"
   >
-    <div class="logo">
+    <div class="aside_logo">
       <i class="el-icon-menu icon" ></i>
       <p class="title" v-if="!isCollapse">网上招聘与求职</p>
     </div>
@@ -68,7 +68,7 @@ export default {
 </script>
 
 <style lang="less">
-.logo {
+.aside_logo {
   display: flex;
   align-items: center;
   padding-left: 22px;

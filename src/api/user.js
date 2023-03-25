@@ -13,20 +13,12 @@ export const login = data => {
   })
 }
 
-// 用户管理搜索
+// 用户分页搜索
 export const getSearchPagination = params => {
   return request({
     method: 'GET',
     url: '/user/pagination',
     params
-  })
-}
-
-// 获取所有用户信息
-export const getAllUser = () => {
-  return request({
-    method: 'GET',
-    url: '/user'
   })
 }
 

@@ -63,12 +63,12 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="info.name" label="用户名" width="150"></el-table-column>
-      <el-table-column prop="info.account" label="账号" width="150"></el-table-column>
-      <el-table-column prop="info.phone" label="电话" width="120"></el-table-column>
-      <el-table-column prop="info.email" label="邮箱" width="200"></el-table-column>
+      <el-table-column prop="name" label="用户名" width="150"></el-table-column>
+      <el-table-column prop="account" label="账号" width="150"></el-table-column>
+      <el-table-column prop="phone" label="电话" width="120"></el-table-column>
+      <el-table-column prop="email" label="邮箱" width="200"></el-table-column>
       <el-table-column prop="firm.designation" label="所属公司" width="150"></el-table-column>
-      <el-table-column prop="info.address" label="住址"></el-table-column>
+      <el-table-column prop="address" label="住址"></el-table-column>
       <el-table-column
         fixed="right"
         label="操作"
@@ -88,15 +88,14 @@
       :page-sizes="[5, 10, 20, 50]"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-    >
+      :total="total">
     </el-pagination>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import { getRoleList, getAllUser, getSearchPagination } from "@/api/user";
+import { getRoleList, getSearchPagination } from "@/api/user";
 
 export default {
   name: "UserView",
@@ -120,33 +119,16 @@ export default {
   created() {
     if(this.user) {
       this.getRoles();
-      this.getUserList();
+      this.getSearch();
     }
   },
   computed: {
-    ...mapState(['user']),
-    searchFlag() {
-      let searchKey = [this.form.uname, this.form.phone, this.form.address];
-      return searchKey.some((item) => item);
-    },
-    searchParam() {
-      let key = Object.keys(this.form);
-      let value = Object.values(this.form);
-      let obj = new Map();
-
-      value.filter((item, index) => {
-        if (item != '') {
-          obj.set(key[index], value[index]);
-        }
-      })
-
-      return obj;
-    }
+    ...mapState(['user'])
   },
   methods: {
     resetSearch() {
-      this.form = {};
-      this.getUserList();
+      this.form.username = this.form.address = this.form.phone = null;
+      this.getSearch();
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -176,42 +158,16 @@ export default {
         this.endErrorMsg(error, '角色信息获取失败')
       }
     },
-    async getUserList() {
-      try {
-        const { data } = await getAllUser();
-        
-        switch (data.code) {
-          case 200:
-            this.showMsg(`获取${data.msg}`, 'success')
-            break;
-          case 300:
-            this.showMsg('没有数据')
-            break;
-          default:
-            new Error('未知错误');
-            break;
-        }
-
-        this.tableData = data.data;
-        this.total = this.tableData.length;
-
-      } catch (error) {
-        this.endErrorMsg(error, '用户信息获取失败')
-      }
-    },
     async getSearch() {
-      if (this.searchFlag && this.user) {
-        const params = {
-          pageNum: this.pageNum,
-          pageSize: this.pageSize,
-        };
-
-        for (const v of this.searchParam) {
-          params[v[0]] = v[1];
-        }
-
+      if (this.user) {
         try {
-          const { data } = await getSearchPagination(params);
+          const { data } = await getSearchPagination({
+            pageNum: this.pageNum,
+            pageSize: this.pageSize,
+            username: this.form.username,
+            address: this.form.address,
+            phone: this.form.phone
+          });
           if(data.code == 200) {
             this.tableData = data.data.records;
             this.total = data.data.total;

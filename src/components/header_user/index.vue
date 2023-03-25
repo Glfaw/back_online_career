@@ -3,19 +3,14 @@
     <div class="menu_toggle">
       <i :class="iconClass" @click="toggleBtn"></i>
     </div>
-    <el-dropdown>
-      <i class="el-icon-setting" style="margin-right: 15px"></i>
+    <el-dropdown class="drop_menu" trigger="click" @command="handleCommand">
+      <span>{{ user? user.name: '未登录'}}<i class="el-icon-arrow-down el-icon--right"></i></span>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item v-if="user">个人信息</el-dropdown-item>
-        <el-dropdown-item v-if="user">
-          <span @click="onLogout">退出登录</span>
-        </el-dropdown-item>
-        <el-dropdown-item v-else>
-          <span @click="$router.replace('/login')">登录账号</span>
-        </el-dropdown-item>
+        <el-dropdown-item command="INFO" v-if="user">个人信息</el-dropdown-item>
+        <el-dropdown-item command="EXIT" v-if="user">退出登录</el-dropdown-item>
+        <el-dropdown-item command="SIGN" v-else>登录账号</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <span>{{ user? user.info.name: '未登录'}}</span>
   </div>
 </template>
 
@@ -45,8 +40,21 @@ export default {
     toggleBtn() {
       this.$emit("changeCollapse");
     },
+    handleCommand(command) {
+      switch (command) {
+        // 未登录
+        case 'SIGN':
+          this.$router.replace('/login')
+          break;
+        case 'INFO':
+          console.log('跳转个人信息');
+          break;
+        case 'EXIT':
+          this.onLogout();
+          break;
+      }
+    },
     onLogout() {
-      console.log(1);
       this.$confirm('确定退出吗?', '退出登录', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -87,6 +95,10 @@ export default {
       font-size: 18px;
       cursor: pointer;
     }
+  }
+
+  .drop_menu {
+    cursor: pointer;
   }
 }
 </style>

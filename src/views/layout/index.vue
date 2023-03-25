@@ -48,12 +48,11 @@ export default {
   width: 100vw;
   height: 100vh;
   .aside_container {
-    //overflow: unset;
     box-shadow: 2px 0 6px rgb(0 21 41 / 35%);
 
     .aside_menu {
       height: 100%;
-      // overflow: hidden;
+      overflow: hidden;
     }
   }
 }
