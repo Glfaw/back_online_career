@@ -7,6 +7,7 @@ body {
   font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   width: 100vw;
   height: 100vh;
+  user-select: none;
 }
 a {
   color: #5c5c5c;
