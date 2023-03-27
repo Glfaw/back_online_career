@@ -2,9 +2,20 @@
   <div class="header_user">
     <div class="menu_toggle">
       <i :class="iconClass" @click="toggleBtn"></i>
+      <el-breadcrumb class="ml_20 m_breadcrumb" separator="/">
+        <el-breadcrumb-item>首页</el-breadcrumb-item>
+        <el-breadcrumb-item v-if="$route.meta?.title">{{ $route.meta.title }}</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
     <el-dropdown class="drop_menu" trigger="click" @command="handleCommand">
-      <span>{{ user? user.name: '未登录'}}<i class="el-icon-arrow-down el-icon--right"></i></span>
+      <div class="card">
+        <el-avatar v-if="user&&user?.avatarUrl" shape="square" :size="25" :src="user.avatarUrl"></el-avatar>
+        <el-avatar v-else shape="square" :size="25">
+          <i class="el-icon-picture-outline"></i>
+        </el-avatar>
+        <span class="name">{{ user? user.name: '未登录'}}</span>
+        <i class="el-icon-arrow-down el-icon--right"></i>
+      </div>
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item command="INFO" v-if="user">个人信息</el-dropdown-item>
         <el-dropdown-item command="EXIT" v-if="user">退出登录</el-dropdown-item>
@@ -27,7 +38,7 @@ export default {
   },
   data() {
     return {
-      collapseBtnClass: ["el-icon-s-fold", "el-icon-s-unfold"],
+      collapseBtnClass: ["el-icon-s-fold", "el-icon-s-unfold"]
     };
   },
   computed: {
@@ -40,6 +51,7 @@ export default {
     toggleBtn() {
       this.$emit("changeCollapse");
     },
+    // 用户菜单
     handleCommand(command) {
       switch (command) {
         // 未登录
@@ -54,24 +66,26 @@ export default {
           break;
       }
     },
+    // 退出登录
     onLogout() {
       this.$confirm('确定退出吗?', '退出登录', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '退出成功!'
-        });
+        this.$notify({
+          type: 'warning',
+          position: 'bottom-right',
+          title: '已安全退出',
+          message: '欢迎下次登录~',
+        })
 
-        this.$store.commit('setUser', null);
+        this.$store.commit('SET_USER', null);
+        this.$store.commit('SET_ROLES', null);
+        this.$store.commit('SET_FIRMS', null);
         this.$router.replace('/login');
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消退出'
-        });          
+        this.$message({type: 'info', message: '已取消退出' });          
       });
     }
   },
@@ -92,13 +106,29 @@ export default {
     align-items: center;
 
     i {
-      font-size: 18px;
+      font-size: 24px;
+      font-weight: 400;
       cursor: pointer;
+      transform: translateY(-1px);
+    }
+
+    .m_breadcrumb {
+      vertical-align: middle;
+      font-size: 16px;
     }
   }
 
   .drop_menu {
     cursor: pointer;
+
+    .card {
+      display: flex;
+      align-items: center;
+
+      .name {
+        margin-left: 10px;
+      }
+    }
   }
 }
 </style>

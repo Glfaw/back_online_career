@@ -5,7 +5,7 @@
       <div class="rotation">
         <el-carousel indicator-position="none" arrow="never" height="90vh">
           <el-carousel-item v-for="(src, index) in bgList" :key="index">
-            <img :src="src" />
+            <el-image :src="src"></el-image>
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -13,32 +13,35 @@
       <div class="login_form">
         <div class="section">
           <img class="logo" src="~@/assets/logo.png" alt="" />
-          <h2 class="header">网上求职与招聘</h2>
+          <h2 class="header">后台管理</h2>
         </div>
         <el-form class="data" :rules="rules" :model="form" ref="ruleForm">
           <!-- 登录 -->
           <el-form-item prop="account" label="账号">
             <el-input
               clearable
+              autofocus
               maxlength="12"
-              v-model.number="form.account"
               placeholder="请输入账号"
+              v-model.number="form.account"
             ></el-input>
           </el-form-item>
           <el-form-item prop="password" label="密码">
             <el-input
-              type="password"
+              clearable
               show-password
-              v-model.trim="form.password"
+              type="password"
               placeholder="请输入密码"
+              v-model.trim="form.password"
+              @keyup.enter.native="userSignIn('ruleForm')"
             ></el-input>
           </el-form-item>
           <el-form-item class="login_btn">
             <el-button
               type="primary"
               icon="el-icon-s-promotion"
-              @click="userSignInOrUp('ruleForm')"
-              >用户登录</el-button>
+              @click="userSignIn('ruleForm')"
+              >登录</el-button>
           </el-form-item>
         </el-form>
         <!-- S 表单背景 -->
@@ -54,6 +57,7 @@
 </template>
 
 <script>
+import { throttle } from 'lodash'
 import { login } from "@/api/user";
 
 export default {
@@ -81,45 +85,45 @@ export default {
     });
   },
   methods: {
-    triggerSign() {
-      this.isRegister = !this.isRegister;
-      this.form = {};
-      this.$refs["ruleForm"].resetFields();
-    },
     showMsg(message, type = "warning") {
       this.$message({ showClose: true, type, message });
     },
-    // 登录或注册
-    userSignInOrUp(formName) {
+    userSignIn(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // 登录
-          this.uLogin();
+          this.handleLogin()
         } else {
           return false;
         }
       });
     },
-    async uLogin() {
+    // 为用户登录做节流
+    handleLogin: throttle(async function() {
       const user = {
         account: this.form.account.toString(),
         password: this.form.password,
       };
 
       try {
-        const { data } = await login(user);
-        if (data.code == 300) {
-          this.showMsg(data.msg, "error");
+        const res = await login(user);
+        if (res.code == 300) {
+          this.showMsg(res.msg, "error");
         } else {
-          this.$store.commit("setUser", data.data);
-          this.showMsg("登录成功", "success");
+          this.$store.commit("SET_USER", res.data);
+          // this.showMsg("登录成功", "success");
+          this.$notify({
+            type: 'success',
+            title: '登录成功',
+            position: 'bottom-right',
+            message: '欢迎使用本系统~'
+          })
 
           this.$router.replace("/");
         }
       } catch (error) {
         this.showMsg(error.message, "error");
       }
-    },
+    }, 200),
   },
 };
 </script>
@@ -187,16 +191,6 @@ export default {
     }
   }
 
-  @keyframes move {
-    from {
-      right: -20%;
-    }
-
-    to {
-      right: 0;
-    }
-  }
-
   .login_form {
     display: flex;
     flex-flow: column nowrap;
@@ -210,7 +204,6 @@ export default {
     background-color: rgba(255, 255, 255, .75);
     border-left: 1px solid rgba(0,0,0, .1);
     z-index: 12;
-    animation: move 0.75s ease-in-out;
 
     .section {
       display: flex;
@@ -226,7 +219,7 @@ export default {
       .header {
         font-size: 24px;
         font-weight: 400;
-        letter-spacing: 3px;
+        letter-spacing: 2px;
       }
     }
 

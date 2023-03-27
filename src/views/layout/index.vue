@@ -21,6 +21,7 @@
 <script>
 import AsideMenu from "@/components/aside_menu";
 import HeaderUser from "@/components/header_user";
+import { mapState } from 'vuex'
 
 export default {
   name: "Layout",
@@ -30,7 +31,14 @@ export default {
       isCollapse: false, 
     };
   },
+  created() {
+    if(this.user) {
+      this.$store.dispatch('loadRoles');
+      this.$store.dispatch('loadFirms');
+    }
+  },
   computed: {
+    ...mapState(['user']),
     asideWidth() {
       return this.isCollapse ? 64 : 200;
     },
