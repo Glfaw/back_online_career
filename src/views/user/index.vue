@@ -214,8 +214,8 @@ export default {
     },
     // 节流：频繁点击每隔时间用户搜索
     handleUserSearch: throttle(function() { this.getSearch() }, 500),
-    // 防抖：5秒内只执行一次【导出】,先执行后等待
-    handleExport: debounce(() => window.open(exportByExcel), 5000, {leading: true}),
+    // 防抖：3秒内只执行一次【导出】,先执行后等待
+    handleExport: debounce(() => window.open(exportByExcel), 3000, {leading: true}),
     // 关闭表单窗口
     dialogClosed() {
       for (const key in this.formDialog) {
