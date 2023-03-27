@@ -33,14 +33,14 @@
               type="password"
               placeholder="请输入密码"
               v-model.trim="form.password"
-              @keyup.enter.native="userSignIn('ruleForm')"
+              @keyup.enter.native="formValidate('ruleForm')"
             ></el-input>
           </el-form-item>
           <el-form-item class="login_btn">
             <el-button
               type="primary"
               icon="el-icon-s-promotion"
-              @click="userSignIn('ruleForm')"
+              @click="formValidate('ruleForm')"
               >登录</el-button>
           </el-form-item>
         </el-form>
@@ -88,13 +88,11 @@ export default {
     showMsg(message, type = "warning") {
       this.$message({ showClose: true, type, message });
     },
-    userSignIn(formName) {
+    // 表单校验
+    formValidate(formName) {
       this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.handleLogin()
-        } else {
-          return false;
-        }
+        if (valid) this.handleLogin();
+        else return false;
       });
     },
     // 为用户登录做节流
