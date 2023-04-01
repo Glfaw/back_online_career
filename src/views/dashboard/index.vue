@@ -1,7 +1,7 @@
 <template>
-  <div class="dashboard_container">
+  <section class="dashboard_container">
     <h4>数据报表</h4>
-  </div>
+  </section>
 </template>
 
 <script>

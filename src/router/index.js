@@ -1,8 +1,22 @@
-import Vue from "vue";
 import store from "@/store";
+import Vue from "vue";
+// import store from "@/store";
 import VueRouter from "vue-router";
 
 Vue.use(VueRouter);
+
+const originalPush = VueRouter.prototype.push
+const originalReplace = VueRouter.prototype.replace
+// push
+VueRouter.prototype.push = function push (location, onResolve, onReject) {
+  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+  return originalPush.call(this, location).catch(err => err)
+}
+// replace
+VueRouter.prototype.replace = function replace (location, onResolve, onReject) {
+  if (onResolve || onReject) return originalReplace.call(this, location, onResolve, onReject)
+  return originalReplace.call(this, location).catch(err => err)
+}
 
 const routes = [
   {
@@ -25,6 +39,12 @@ const routes = [
         name: "user",
         component: () => import("@/views/user"),
         meta: {title: '用户管理'}
+      },
+      {
+        path: "/person",
+        name: "person",
+        component: () => import("@/views/person"),
+        meta: {title: '个人中心'}
       },
       {
         path: "/role",
@@ -62,16 +82,14 @@ const router = new VueRouter({
 // 前置守卫逻辑
 function beforeRoute(to, from, next) {
   // 判断是否已登录
-  if(to.path == '/login') next()
-  else {
-    // 已登录
-    if(store.state.user) {
-      // 保存当前页面路由
-      // store.commit('SET_PATH', to.path)
-      next()
-    }
-    else next({path: '/login'})
-  }
+  // if(to.name == 'login' || to.name == 'home') next()
+  // else {
+  //   if(store.state.user?.token) next()
+  //   else {
+  //     next()
+  //   }
+  // }
+  next()
 }
 
 // 后置守卫逻辑

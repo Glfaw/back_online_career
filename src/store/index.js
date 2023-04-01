@@ -11,8 +11,6 @@ const USER_KEY = 'ACCOUNT_USER'
 const ROLE_KEY = 'ROLE_POWER'
 // 公司表
 const FIRM_KEY = 'COMPANY_LIST'
-// 当前路由
-const PATH_KEY = 'PAGE_PATH'
 
 const actions = {
   // 请求角色权限
@@ -47,17 +45,12 @@ const mutations = {
     state.allFirms = data
     setItem(FIRM_KEY, state.allFirms)
   },
-  SET_PATH(state, data) {
-    state.pagePath = data
-    setItem(PATH_KEY, state.pagePath)
-  }
 }
 
 const state = {
   user: getItem(USER_KEY),
   allRoles: getItem(ROLE_KEY),
   allFirms: getItem(FIRM_KEY),
-  pagePath: getItem(PATH_KEY)
 }
 
 export default new Vuex.Store({

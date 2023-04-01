@@ -1,7 +1,7 @@
 <template>
-  <div class="role_container">
+  <section class="role_container">
     <h4>角色管理</h4>
-  </div>
+  </section>
 </template>
 
 <script>

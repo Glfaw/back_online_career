@@ -1,4 +1,4 @@
-import request from "@/utils/request";
+import request from "@/utils/request"
 
 /**
  * 用户模块 /user
@@ -47,9 +47,6 @@ export const addUser = data => {
   })
 }
 
-// 导出所有用户信息
-export const exportByExcel = 'http://localhost:9090/back/user/export'
-
 // 根据id删除
 export const deleteUserByID = id => {
   return request({
@@ -72,6 +69,23 @@ export const updateUser = data => {
   return request({
     method: 'PUT',
     url: '/user',
+    data
+  })
+}
+
+// 获取个人信息
+export const loadPersonal = id => {
+  return request({
+    method: 'GET',
+    url: `/user/${id}`
+  })
+}
+
+// 用户个人信息更改
+export const refreshPersonal = data => {
+  return request({
+    method: 'PUT',
+    url: '/user/person',
     data
   })
 }

@@ -1,7 +1,7 @@
 <template>
-  <div class="menu_container">
+  <section class="menu_container">
     <p>菜单管理</p>
-  </div>
+  </section>
 </template>
 
 <script>

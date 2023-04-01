@@ -1,5 +1,5 @@
 <template>
-  <div class="home_container">
+  <section class="home_container">
     <el-row>
       <el-col
         :span="8"
@@ -21,7 +21,7 @@
         </el-card>
       </el-col>
     </el-row>
-  </div>
+  </section>
 </template>
 
 <script>

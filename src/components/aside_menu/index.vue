@@ -16,6 +16,10 @@
       <i class="el-icon-s-home"></i>
       <span>首页</span>
     </el-menu-item>
+    <el-menu-item index="/person">
+      <i class="el-icon-location"></i>
+      <span>个人中心</span>
+    </el-menu-item>
     <el-submenu index="sys">
       <template #title>
         <i class="el-icon-setting"></i>

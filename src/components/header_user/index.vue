@@ -9,15 +9,15 @@
     </div>
     <el-dropdown class="drop_menu" trigger="click" @command="handleCommand">
       <div class="card">
-        <el-avatar v-if="user&&user?.avatarUrl" shape="square" :size="25" :src="user.avatarUrl"></el-avatar>
-        <el-avatar v-else shape="square" :size="25">
+        <el-avatar fit="contain" v-if="user&&user?.avatarUrl" shape="square" :size="30" :src="user.avatarUrl"></el-avatar>
+        <el-avatar v-else shape="square" :size="30">
           <i class="el-icon-picture-outline"></i>
         </el-avatar>
         <span class="name">{{ user? user.name: '未登录'}}</span>
         <i class="el-icon-arrow-down el-icon--right"></i>
       </div>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item command="INFO" v-if="user">个人信息</el-dropdown-item>
+        <el-dropdown-item command="INFO" v-if="user">个人中心</el-dropdown-item>
         <el-dropdown-item command="EXIT" v-if="user">退出登录</el-dropdown-item>
         <el-dropdown-item command="SIGN" v-else>登录账号</el-dropdown-item>
       </el-dropdown-menu>
@@ -26,8 +26,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-
 export default {
   name: "HeaderUser",
   props: {
@@ -35,6 +33,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    user: {
+      type: Object,
+      default: null
+    }
   },
   data() {
     return {
@@ -42,7 +44,6 @@ export default {
     };
   },
   computed: {
-    ...mapState(['user']),
     iconClass() {
       return this.collapseBtnClass[Number(this.isCollapse)]
     }
@@ -59,7 +60,7 @@ export default {
           this.$router.replace('/login')
           break;
         case 'INFO':
-          console.log('跳转个人信息');
+          this.$router.replace('/person')
           break;
         case 'EXIT':
           this.onLogout();

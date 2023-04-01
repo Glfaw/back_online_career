@@ -1,19 +1,24 @@
 import axios from "axios";
 import store from "@/store";
+import router from "@/router";
+import { Notification } from "element-ui";
 
 const request = axios.create({
   baseURL: '/api/back',
-  timeout: 5000
 })
 
 // 请求拦截器
 request.interceptors.request.use(
   config => {
+    config.headers['Content-Type'] = config.url.includes('/upload/')
+      ? 'mutipart/form-data;charset=utf-8'
+      : 'application/json;charset=utf-8'
+
     const { user } = store.state;
-    config.headers['Content-Type'] = 'application/json;charset=utf-8';
-    // 携带token
-    // if(user && user.token)
-    //   config.headers['Authorization'] = `Bearer ${user.token}`
+    // // 携带token
+    if(user && user.token)
+      config.headers['Authorization'] = `${user.token}`
+      
     return config;
   },
   error => Promise.reject(error)
@@ -23,6 +28,14 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   response => {
     let res = response.data;
+    if(res.code == 401) {
+      Notification({
+        type: 'error',
+        title: '访问失败',
+        message: `${res.msg}`
+      })
+      router.replace('/login')
+    }
     if(response.config.responseType === 'blob') return res;
     if(typeof res === 'string') {
       res = res? JSON.parse(res): res

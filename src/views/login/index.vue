@@ -1,11 +1,11 @@
 <template>
-  <div class="login_container">
+  <section class="login_container">
     <div class="wrapper">
       <div class="mark"></div>
       <div class="rotation">
         <el-carousel indicator-position="none" arrow="never" height="90vh">
-          <el-carousel-item v-for="(src, index) in bgList" :key="index">
-            <el-image :src="src"></el-image>
+          <el-carousel-item v-for="index in 4" :key="index">
+            <el-image :src="`https://web-online-career.oss-cn-hangzhou.aliyuncs.com/rotation/bg${index}.png`"></el-image>
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -15,7 +15,7 @@
           <img class="logo" src="~@/assets/logo.png" alt="" />
           <h2 class="header">后台管理</h2>
         </div>
-        <el-form class="data" :rules="rules" :model="form" ref="ruleForm">
+        <el-form class="data" :rules="rules" :model="user" ref="ruleUserForm">
           <!-- 登录 -->
           <el-form-item prop="account" label="账号">
             <el-input
@@ -23,7 +23,8 @@
               autofocus
               maxlength="12"
               placeholder="请输入账号"
-              v-model.number="form.account"
+              prefix-icon="el-icon-user"
+              v-model.number="user.account"
             ></el-input>
           </el-form-item>
           <el-form-item prop="password" label="密码">
@@ -32,15 +33,16 @@
               show-password
               type="password"
               placeholder="请输入密码"
-              v-model.trim="form.password"
-              @keyup.enter.native="formValidate('ruleForm')"
+              prefix-icon="el-icon-lock"
+              v-model.trim="user.password"
+              @keyup.enter.native="formValidate"
             ></el-input>
           </el-form-item>
           <el-form-item class="login_btn">
             <el-button
               type="primary"
               icon="el-icon-s-promotion"
-              @click="formValidate('ruleForm')"
+              @click="formValidate"
               >登录</el-button>
           </el-form-item>
         </el-form>
@@ -53,7 +55,7 @@
       </div>
       <!-- E 登录表单 -->
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -64,8 +66,7 @@ export default {
   name: "Login",
   data() {
     return {
-      bgList: [],
-      form: {
+      user: {
         account: null,
         password: "",
       },
@@ -78,19 +79,13 @@ export default {
       },
     };
   },
-  created() {
-    let mode = require.context("@/assets/rotation", false);
-    mode.keys().forEach((iteam) => {
-      this.bgList.push(require(`@/assets/rotation/${iteam.substring(2)}`));
-    });
-  },
   methods: {
     showMsg(message, type = "warning") {
       this.$message({ showClose: true, type, message });
     },
     // 表单校验
-    formValidate(formName) {
-      this.$refs[formName].validate((valid) => {
+    formValidate() {
+      this.$refs['ruleUserForm'].validate((valid) => {
         if (valid) this.handleLogin();
         else return false;
       });
@@ -98,17 +93,15 @@ export default {
     // 为用户登录做节流
     handleLogin: throttle(async function() {
       const user = {
-        account: this.form.account.toString(),
-        password: this.form.password,
-      };
-
+        account: this.user.account.toString(),
+        password: this.user.password
+      }
       try {
         const res = await login(user);
         if (res.code == 300) {
           this.showMsg(res.msg, "error");
         } else {
           this.$store.commit("SET_USER", res.data);
-          // this.showMsg("登录成功", "success");
           this.$notify({
             type: 'success',
             title: '登录成功',
@@ -121,7 +114,7 @@ export default {
       } catch (error) {
         this.showMsg(error.message, "error");
       }
-    }, 200),
+    }, 200, {leading: true}),
   },
 };
 </script>

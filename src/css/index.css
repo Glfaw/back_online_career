@@ -7,7 +7,6 @@ body {
   font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   width: 100vw;
   height: 100vh;
-  user-select: none;
 }
 @keyframes movement {
   0%,
@@ -53,6 +52,12 @@ a {
   color: #5c5c5c;
   text-decoration: none;
 }
+.fl_l {
+  float: left !important;
+}
+.fl_r {
+  float: right !important;
+}
 .ml_5 {
   margin-left: 5px !important;
 }
@@ -79,4 +84,13 @@ a {
 }
 .mt_20 {
   margin-top: 20px !important;
+}
+.mb_5 {
+  margin-bottom: 5px !important;
+}
+.mb_10 {
+  margin-bottom: 10px !important;
+}
+.mb_20 {
+  margin-bottom: 20px !important;
 }
