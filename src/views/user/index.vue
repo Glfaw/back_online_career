@@ -1,6 +1,5 @@
 <template>
   <section class="user_container">
-    <loading-wrapper :isLoading="true" :label="loadingLabel" />
     <el-row class="user_header" :gutter="20">
       <!-- 搜索区 -->
       <el-col :span="5">
@@ -43,7 +42,7 @@
                 <el-button
                   type="primary"
                   icon="el-icon-search"
-                  @click="handleUserSearch"
+                  @click="getSearch"
                 >搜索</el-button>
                 <el-button
                   icon="el-icon-refresh"
@@ -60,10 +59,13 @@
         <el-card class="card_dialog">
           <div slot="header">
             <span class="title">{{ isInsertOrUpdate? '新增用户': '编辑用户' }}</span>
-            <div class="fl_r command">
-              <el-button v-if="isInsertOrUpdate" class="add" size="mini" type="primary" icon="el-icon-circle-plus" @click="handleInsert">添加</el-button>
-              <el-button v-if="!isInsertOrUpdate" class="save" size="mini" type="warning" icon="el-icon-notebook-2" @click="handleUpdate">保存</el-button>
-              <el-button v-if="!isInsertOrUpdate" class="cancel" size="mini" icon="el-icon-close" @click="dialogInit">取消</el-button>
+            <div v-if="isInsertOrUpdate" class="fl_r command">
+              <el-button size="mini" type="primary" icon="el-icon-circle-plus" @click="handleInsert">添加</el-button>
+              <el-button size="mini" icon="el-icon-refresh" @click="dialogInit">清空</el-button>
+            </div>
+            <div v-else class="fl_r command">
+              <el-button size="mini" type="warning" icon="el-icon-notebook-2" @click="handleUpdate">保存</el-button>
+              <el-button size="mini" icon="el-icon-close" @click="dialogInit">取消</el-button>
             </div>
           </div>
           <el-form class="dialog" label-width="60px" label-position="left" :model="formDialog">
@@ -72,17 +74,19 @@
               <el-col class="left" :span="9">
                 <el-form-item label="头像" style="height: 75px">
                   <el-upload
+                    action=""
                     class="avatar-uploader"
-                    :class="{avatar_border: isInsertOrUpdate}"
                     :show-file-list="false"
-                    action="https://jsonplaceholder.typicode.com/posts/"
-                    @on-change="handleChangeAvatar"
+                    :before-upload="beforeUploadAvatar"
+                    :http-request="handleUploadAvatar"
+                    :class="{avatar_border: !formDialog?.avatarUrl}"
+                    v-loading.fullscreen.lock="isFullScreenLoading"
                   >
                     <el-avatar
                       v-if="formDialog.avatarUrl"
                       fit="contain"
                       shape="square" 
-                      :size="60" 
+                      :size="60"
                       :src="formDialog.avatarUrl"
                     ></el-avatar>
                     <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -176,18 +180,18 @@
                 type="danger"
                 slot="reference"
                 icon="el-icon-remove"
-                :disabled="!seletionIds.length"
+                :disabled="seletionIds?.length < 2"
               >批量删除</el-button>
             </el-popconfirm>
             <el-upload
-              accept=".xlsx"
               action=""
+              accept=".xlsx"
               :show-file-list="false"
               :http-request="handleUploadImport"
             >
-              <el-button type="info" class="ml_10 mr_10" icon="el-icon-download">导入</el-button>
+              <el-button type="info" class="ml_10 mr_10" icon="el-icon-download" v-loading.fullscreen.lock="isFullScreenLoading">导入</el-button>
             </el-upload>
-            <el-button type="warning" icon="el-icon-upload2">导出</el-button>
+            <el-button type="warning" icon="el-icon-upload2" v-loading.fullscreen.lock="isFullScreenLoading" @click="handleUploadExport">导出</el-button>
           </div>
         </el-card>
       </el-col>
@@ -200,20 +204,19 @@
         <!-- 我的分页 -->
         <el-pagination
           class="fl_r"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
+          :total="total"
+          :page-size="pageSize"
           :current-page="pageNum"
           :page-sizes="[5, 10, 20, 50]"
-          :page-size="pageSize"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          :hide-on-single-page="total < pageSize"
         ></el-pagination>
       </div>
       
 
       <!-- 表格数据 -->
-      <el-table stripe class="user_table" header-cell-class-name="user_table_header" :data="tableData" @selection-change="handleSelectChange">
+      <el-table stripe class="user_table" header-cell-class-name="user_table_header" v-loading="isTableLoading" :data="tableData" @selection-change="handleSelectChange">
         <el-table-column fixed type="selection" width="50" align="center"></el-table-column>
         <el-table-column fixed prop="id" label="ID" width="50"></el-table-column>
         <el-table-column prop="name" label="用户名" width="120"></el-table-column>
@@ -249,11 +252,10 @@
 </template>
 
 <script>
-import LoadingWrapper from '@/components/loading_wrapper'
 import { mapState } from 'vuex'
 // 引入节流防抖，为用户自定义搜索节流、导出excel防抖
 import { debounce, throttle } from 'lodash'
-import { uploadExcelImport, uploadExcelExport } from '@/api/upload'
+import { uploadAvatar, uploadExcelImport, uploadExcelExport } from '@/api/upload'
 import { addUser, deleteUserByID, getPagination, updateUser, deleteUserBySelect } from "@/api/user"
 
 export default {
@@ -283,63 +285,39 @@ export default {
       pageNum: 1,
       pageSize: 10,
       total: 0,
-      loadingLabel: '',
-      isLoading: false,
+      isTableLoading: false,
+      isFullScreenLoading: false,
       isInsertOrUpdate: true,
     };
   },
-  components: { LoadingWrapper },
   created() {
     this.getSearch();
   },
   computed: {
-    ...mapState(['user', 'allRoles', 'allFirms']),
+    ...mapState(['user', 'allRoles', 'allFirms'])
   },
   methods: {
-    showMsg(message, type='warning') {
+    showMsg(message, type = 'warning') {
       this.$message({ type, message, showClose: true })
+    },
+    handleNotify(title, message, type = 'warning') {
+      this.$notify({ type, title, message, position: 'bottom-right' })
     },
     resetSearch() {
       this.formSearch.username = this.formSearch.address = this.formSearch.phone = null;
-      this.handleUserSearch();
+      this.getSearch();
     },
     handleSizeChange(val) {
       this.pageSize = val
-      this.handleUserSearch()
+      this.getSearch()
     },
     handleCurrentChange(val) {
       this.pageNum = val
-      this.handleUserSearch()
+      this.getSearch()
     },
     handleSelectChange(list) {
       this.seletionIds = [...list.map(v => v.id)];
     },
-    
-    handleChangeAvatar(file, fileList) {
-      console.log(file, fileList);
-    },
-    handleUploadAvatar() {
-
-    },
-    handleNotify(title, message, type='info') {
-      this.$notify({ type, title, message, position: 'bottom-right' })
-    },
-    // 节流：频繁点击每隔时间用户搜索
-    handleUserSearch: throttle(function() { this.getSearch() }, 500, {leading: true}),
-    // 防抖：3秒内只执行一次【导出】,先执行后等待
-    // handleExport: debounce(function() {
-    //   window.open(excelExport)
-    //   this.handleNotify('文件导出成功', '已成功导出数据为Excel文件', 'success')
-    // }, 3000, {leading: true}),
-    // 导入
-    // handleExcelImport: throttle(function(res) {
-    //   if(typeof res == 'boolean' && res) {
-    //     this.handleNotify('文件导入成功', '已成功导入Excel文件数据', 'success')
-    //     this.getSearch()
-    //   } else if (res.code == 300) {
-    //     this.handleNotify('文件导入失败', `${res.msg}`, 'error')
-    //   }
-    // }, 500),
     // 初始化表单
     dialogInit() {
       for (const key in this.formDialog) {
@@ -361,6 +339,32 @@ export default {
       Object.assign(this.formDialog, row)
       this.isInsertOrUpdate = false
     },
+    beforeUploadAvatar(file) {
+      const isType = (file.type === 'image/jpeg') || (file.type === 'image/png')
+      const isLt2M = (file.size / 1024 / 1024) < 2;
+      if(!isType) this.showMsg('图片类型只能是jpeg/png格式')
+      if(!isLt2M) this.showMsg('上传图片大小不能超过2M')
+
+      return isType && isLt2M
+    },
+    async handleUploadAvatar({file}) {
+      this.isFullScreenLoading = true
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const res = await uploadAvatar(formData)
+        if(res.code == 200) {
+          this.showMsg('头像上传成功', 'success')
+          this.formDialog.avatarUrl = res.data
+        }
+        else this.showMsg(res.msg)
+      } catch (error) {
+        this.showMsg(error.message, 'error')
+      } finally {
+        this.isFullScreenLoading = false
+      }
+    },
     // 执行【新增】
     async handleInsert() {
       try {
@@ -370,7 +374,7 @@ export default {
           this.dialogInit();
           this.getSearch();
         }
-        else this.showMsg(res.msg, 'error')
+        else this.showMsg(res.msg)
       } catch (error) {
         this.showMsg(error.message, 'error')
       }
@@ -384,7 +388,7 @@ export default {
           this.dialogInit();
           this.getSearch();
         }
-        else this.showMsg(res.msg, 'error')
+        else this.showMsg(res.msg)
       } catch (error) {
         this.showMsg(error.message, 'error')
       }
@@ -398,7 +402,7 @@ export default {
           this.showMsg('删除成功', 'success')
           this.getSearch()
         }
-        else this.showMsg(res.msg, 'error')
+        else this.showMsg(res.msg)
       } catch (error) {
         this.showMsg(error.message, 'error')
       }
@@ -412,28 +416,63 @@ export default {
           this.showMsg('批量删除成功', 'success');
           this.getSearch();
         }
-        else this.showMsg(res.msg, 'error')
+        else this.showMsg(res.msg)
       } catch (error) {
         this.showMsg(error.message, 'error')
       }
     },
-    // 执行导入
-    async handleUploadImport({file}) {
+    // 执行【导入】
+    handleUploadImport: throttle(async function({ file }) {
+      this.isFullScreenLoading = true
       try {
         const formData = new FormData()
         formData.append('file', file)
 
         const res = await uploadExcelImport(formData)
-        if(res.code == 200) {
-          console.log(res.data);
-        } else this.showMsg(res.msg)
+        if(res) {
+          this.handleNotify('导入成功', 'success');
+          this.getSearch()
+        } else this.handleNotify(res.msg)
       } catch (error) {
-        console.log(error.message);        
+        this.handleNotify(error.message, 'error')
+      } finally {
+        this.isFullScreenLoading = false
       }
-    },
-
+    }, 500),
+    // 执行【导出】
+    handleUploadExport: debounce(async function() {
+      this.isFullScreenLoading = true
+      try {
+        const res = await uploadExcelExport()
+        if(res.status == 200) {
+          // 切割文件名
+          const encodeFileName = res.headers['content-disposition'].split('filename=')[1]
+          // 解码
+          const fileName = decodeURIComponent(encodeFileName)
+          // 设置Type类型
+          const blob = new Blob([res.data], { type: res.data.type })
+          // 生成文件链接
+          const fileURL = window.URL.createObjectURL(blob)
+          // 创建超链接
+          const link = document.createElement('a');
+          link.style.display = 'none'
+          link.href = fileURL
+          link.setAttribute('download', fileName)
+          // 执行下载
+          link.click()
+          // 移除link
+          link.remove()
+          this.handleNotify('导出成功', `已成功导出文件：${fileName}`, 'success')
+        } else this.handleNotify('导出失败', `失败原因：${res.statusText}`)
+      } catch (error) {
+        this.handleNotify('导出异常', `异常原因：${error.message}`, 'error')
+      } finally {
+        this.isFullScreenLoading = false
+      }
+    }, 3000, { leading: true }),
     // 执行【分页】
-    async getSearch() {
+    getSearch: throttle(async function() {
+      this.isTableLoading = true
       try {
         const res = await getPagination({
           pageNum: this.pageNum,
@@ -441,15 +480,17 @@ export default {
           username: this.formSearch.username,
           address: this.formSearch.address,
           phone: this.formSearch.phone
-        });
+        })
         if(res.code == 200) {
           this.tableData = res.data.records;
           this.total = res.data.total;
-        }
+        } else this.showMsg(res.msg)
       } catch (error) {
         this.showMsg(error.message, 'error')
+      } finally {
+        this.isTableLoading = false
       }
-    },
+    }, 500, { leading: true })
   },
 };
 </script>
@@ -533,7 +574,6 @@ export default {
       }
 
       .right {
-
         .el-form-item {
           margin-bottom: 22px;
         }
@@ -561,7 +601,6 @@ export default {
       }
 
       .user_table_header {
-        // color: #fff;
         background-color: #f3f5f7 !important;
       }
     }

@@ -16,19 +16,18 @@ export default {
       default: false
     },
     label: {
-      type: String,
-      default: '加载中...'
+      type: String
     }
   },
   data() {
     return {
-      text: this.label
+      text: this.label || '加载中...'
     }
   },
   watch: {
     isLoading(status) {
-      this.text = this.label
       if(status == false) this.text = ''
+      this.text = this.label
     }
   },
 }

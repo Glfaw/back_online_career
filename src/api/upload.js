@@ -36,6 +36,7 @@ export const uploadExcelImport = data => {
 export const uploadExcelExport = () => {
   return request({
     method: 'GET',
-    url: '/upload/excel/export'
+    url: '/upload/excel/export',
+    responseType: 'blob'
   })
 }

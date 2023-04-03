@@ -10,8 +10,8 @@
       </el-header>
 
       <!-- 内容区域 -->
-      <el-main class="main">
-        <el-backtop target=".main" :visibility-height="20" :right="30">
+      <el-main class="main_page">
+        <el-backtop target=".main_page" :visibility-height="20" :right="30">
           <i class="el-icon-caret-top"></i>
         </el-backtop>
         <!-- 子路由出口 -->
@@ -99,7 +99,7 @@ export default {
     }
   }
 
-  .main {
+  .main_page {
     position: relative;
     background-color: #F0F2F5;
 

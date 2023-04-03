@@ -24,9 +24,10 @@ request.interceptors.request.use(
   error => Promise.reject(error)
 )
 
-// 相应拦截器
+// 响应拦截器
 request.interceptors.response.use(
   response => {
+    if(response.config.responseType === 'blob') return response;
     let res = response.data;
     if(res.code == 401) {
       Notification({
@@ -36,7 +37,6 @@ request.interceptors.response.use(
       })
       router.replace('/login')
     }
-    if(response.config.responseType === 'blob') return res;
     if(typeof res === 'string') {
       res = res? JSON.parse(res): res
     }

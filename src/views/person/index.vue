@@ -7,7 +7,12 @@
           <div slot="header">
             <span>个人信息</span>
             <div v-if="!isFormEdit" class="fl_r command">
-              <el-button size="small" type="success" icon="el-icon-edit" @click="isFormEdit = true">编辑</el-button>
+              <el-button
+                size="small"
+                type="success"
+                icon="el-icon-edit"
+                @click="isFormEdit = true"
+              >编辑</el-button>
             </div>
           </div>
           <el-form label-width="80px" label-position="left" :model="person" :disabled="!isFormEdit">
@@ -29,8 +34,8 @@
               </el-col>
               <el-col :span="10" class="fl_r">
                 <el-upload
-                  class="u_avatar fl_r"
                   action=""
+                  class="u_avatar fl_r"
                   :show-file-list="false"
                   :before-upload="beforeUploadAvatar"
                   :http-request="handleUploadAvatar"
@@ -147,6 +152,25 @@ export default {
 
       return isType && isLt2M
     },
+    async handleUploadAvatar({file}) {
+      this.isLoading = true;
+      this.loadingLabel = '图片上传中...'
+      try {
+        const formData = new FormData();
+        formData.append('file', file)
+
+        const res = await uploadAvatar(formData)
+        if(res.code == 200) {
+          this.showMsg('图片上传成功，请点击保存完成修改')
+          this.person.avatarUrl = res.data
+        }
+        else this.showMsg(res.msg)
+      } catch (error) {
+        this.showMsg(error.message, 'error')
+      } finally {
+        this.isLoading = false
+      }
+    },
     async handleGetPerson() {
       this.isFormEdit = false;
       try {
@@ -171,25 +195,6 @@ export default {
         this.showMsg(error.message, 'error')
       }
     },
-    async handleUploadAvatar({file}) {
-      this.isLoading = true;
-      this.loadingLabel = '图片上传中...'
-      try {
-        const formData = new FormData();
-        formData.append('file', file)
-
-        const res = await uploadAvatar(formData)
-        if(res.code == 200) {
-          this.showMsg('图片上传成功，请点击保存完成修改')
-          this.person.avatarUrl = res.data
-        }
-        else this.showMsg(res.msg)
-      } catch (error) {
-        this.showMsg(error.message, 'error')
-      } finally {
-        this.isLoading = false
-      }
-    }
   }
 }
 </script>
