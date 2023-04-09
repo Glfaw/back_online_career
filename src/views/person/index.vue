@@ -139,7 +139,7 @@ export default {
   },
   methods: {
     handleRoleChange(role) {
-      if(role != 2) this.person.firmId = null
+      if(role !== 2) this.person.firmId = null
     },
     showMsg(message, type='warning') {
       this.$message({ type, message, showClose: true })
@@ -160,7 +160,7 @@ export default {
         formData.append('file', file)
 
         const res = await uploadAvatar(formData)
-        if(res.code == 200) {
+        if(res.code === 200) {
           this.showMsg('图片上传成功，请点击保存完成修改')
           this.person.avatarUrl = res.data
         }
@@ -175,7 +175,7 @@ export default {
       this.isFormEdit = false;
       try {
         const res = await loadPersonal(this.user.id);
-        if(res.code == 200) this.person = res.data
+        if(res.code === 200) this.person = res.data
         else this.showMsg(res.msg)
       } catch (error) {
         this.showMsg(error.message, 'error')
@@ -186,7 +186,7 @@ export default {
     async handleUpdatePerson() {
       try {
         const res = await refreshPersonal(this.person)
-        if(res.code == 200) {
+        if(res.code === 200) {
           this.isFormEdit = false
           this.$emit('refreshUser', this.person.id)
         }
