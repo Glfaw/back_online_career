@@ -95,13 +95,13 @@ export default {
 
   .el-card {
     .command {
-      transform: translateY(-3px);
+      transform: translateY(-5px);
     }
   }
 
   .main_page {
     position: relative;
-    background-color: #F0F2F5;
+    background-color: #F3F5F7;
 
     .el-backtop {
       color: #fff;

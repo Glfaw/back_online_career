@@ -2,8 +2,9 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import { getItem, setItem } from '@/utils/storage'
-import { getRoleList, getFirmList } from '@/api/user'
- 
+import { getFirmList } from '@/api/user'
+import { getAllRoles } from "@/api/role"
+
 Vue.use(Vuex);
 
 const USER_KEY = 'ACCOUNT_USER'
@@ -15,7 +16,7 @@ const FIRM_KEY = 'COMPANY_LIST'
 const actions = {
   // 请求角色权限
   async loadRoles(content) {
-    const res = await getRoleList();
+    const res = await getAllRoles();
     if(res.code == 200) {
       content.commit('SET_ROLES', res.data)
     }

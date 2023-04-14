@@ -37,19 +37,17 @@
                 v-model.trim="formSearch.address"
               ></el-input>
             </el-form-item>
-            <el-form-item>
-              <div class="btn">
-                <el-button
+            <div class="btn">
+              <el-button
                   type="primary"
                   icon="el-icon-search"
                   @click="getSearch"
-                >搜索</el-button>
-                <el-button
+              >搜索</el-button>
+              <el-button
                   icon="el-icon-refresh"
                   @click="resetSearch"
-                >重置</el-button>
-              </div>
-            </el-form-item>
+              >重置</el-button>
+            </div>
           </el-form>
         </el-card>
       </el-col>
@@ -60,12 +58,12 @@
           <div slot="header">
             <span class="title">{{ isInsertOrUpdate? '新增用户': '编辑用户' }}</span>
             <div v-if="isInsertOrUpdate" class="fl_r command">
-              <el-button size="mini" type="primary" icon="el-icon-circle-plus" @click="handleInsert">添加</el-button>
-              <el-button size="mini" icon="el-icon-refresh" @click="dialogInit">清空</el-button>
+              <el-button size="small" type="primary" icon="el-icon-circle-plus" @click="handleInsert">添加</el-button>
+              <el-button size="small" icon="el-icon-refresh" @click="dialogInit">重置</el-button>
             </div>
             <div v-else class="fl_r command">
-              <el-button size="mini" type="warning" icon="el-icon-notebook-2" @click="handleUpdate">保存</el-button>
-              <el-button size="mini" icon="el-icon-close" @click="dialogInit">取消</el-button>
+              <el-button size="small" type="info" icon="el-icon-notebook-2" @click="handleUpdate">保存</el-button>
+              <el-button size="small" icon="el-icon-close" @click="dialogInit">取消</el-button>
             </div>
           </div>
           <el-form class="dialog" label-width="60px" label-position="left" :model="formDialog">
@@ -107,9 +105,7 @@
                 </el-form-item>
                 <el-form-item label="角色">
                   <el-select size="mini" placeholder="请选择用户角色" v-model="formDialog.roleId" @change="dialogRoleChange">
-                    <el-option label="超级管理员" :value="1"></el-option>
-                    <el-option label="管理员" :value="2"></el-option>
-                    <el-option label="求职者" :value="3"></el-option>
+                    <el-option v-for="item in allRoles" :key="item.id" :label="item.name" :value="item.id"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="企业">
@@ -191,7 +187,7 @@
             >
               <el-button type="info" class="ml_10 mr_10" icon="el-icon-download" v-loading.fullscreen.lock="isFullScreenLoading">导入</el-button>
             </el-upload>
-            <el-button type="warning" icon="el-icon-upload2" v-loading.fullscreen.lock="isFullScreenLoading" @click="handleUploadExport">导出</el-button>
+            <el-button type="primary" icon="el-icon-upload2" v-loading.fullscreen.lock="isFullScreenLoading" @click="handleUploadExport">导出</el-button>
           </div>
         </el-card>
       </el-col>
@@ -200,7 +196,7 @@
     <!-- 数据列表 -->
     <el-card class="card_tableData mt_20">
       <div class="card_header" slot="header">
-        <span class="title">数据列表</span>
+        <span class="title">用户列表</span>
         <!-- 我的分页 -->
         <el-pagination
           class="fl_r"
@@ -213,11 +209,10 @@
           layout="total, sizes, prev, pager, next, jumper"
         ></el-pagination>
       </div>
-      
 
       <!-- 表格数据 -->
-      <el-table stripe class="user_table" header-cell-class-name="user_table_header" v-loading="isTableLoading" :data="tableData" @selection-change="handleSelectChange">
-        <el-table-column fixed type="selection" width="50" align="center"></el-table-column>
+      <el-table border stripe header-cell-class-name="user_table_header" v-loading="isTableLoading" :data="tableData" @selection-change="handleSelectChange">
+        <el-table-column fixed type="selection" width="40"></el-table-column>
         <el-table-column fixed prop="id" label="ID" width="50"></el-table-column>
         <el-table-column prop="name" label="用户名" width="120"></el-table-column>
         <el-table-column prop="account" label="账号" width="120"></el-table-column>
@@ -240,7 +235,7 @@
         </el-table-column>
         <el-table-column label="操作" width="200" align="center">
           <template slot-scope="scope">
-            <el-button class="mr_10" icon="el-icon-edit" type="success" size="mini" @click="dialogUpdate(scope.row)">编辑</el-button>
+            <el-button class="mr_10" icon="el-icon-edit" type="warning" size="mini" @click="dialogUpdate(scope.row)">编辑</el-button>
             <el-popconfirm title="确定要删除吗" @confirm="handleRowDel(scope.row)">
               <el-button slot="reference" icon="el-icon-remove-outline" type="danger" size="mini">删除</el-button>
             </el-popconfirm>
@@ -513,7 +508,6 @@ export default {
 
       .btn {
         display: flex;
-        justify-content: flex-end;
 
         button {
           flex: 1;
@@ -595,14 +589,8 @@ export default {
       height: 32px;
     }
 
-    .user_table {
-      &::before {
-        display: none;
-      }
-
-      .user_table_header {
-        background-color: #f3f5f7 !important;
-      }
+    .user_table_header {
+      background-color: #f3f5f7 !important;
     }
   }
 

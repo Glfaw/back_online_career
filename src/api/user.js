@@ -30,17 +30,6 @@ export const getPagination = params => {
 }
 
 /**
- * 获取角色表
- * @returns Array[...]
- */
-export const getRoleList = () => {
-  return request({
-    method: 'GET',
-    url: '/user/roleList'
-  })
-}
-
-/**
  * 获取所有公司列表
  * @returns Array[...]
  */

@@ -9,19 +9,19 @@
     :collapse="isCollapse"
   >
     <div class="aside_logo">
-      <i class="el-icon-menu icon" ></i>
-      <p class="title" v-if="!isCollapse">网上招聘与求职</p>
+      <i class="el-icon-s-shop mr_10"></i>
+      <span v-if="!isCollapse">网上招聘与求职</span>
     </div>
     <el-menu-item index="/">
       <i class="el-icon-s-home"></i>
       <span>首页</span>
     </el-menu-item>
     <el-menu-item index="/person">
-      <i class="el-icon-location"></i>
+      <i class="el-icon-monitor"></i>
       <span>个人中心</span>
     </el-menu-item>
     <el-submenu index="sys">
-      <template #title>
+      <template slot="title">
         <i class="el-icon-setting"></i>
         <span>系统管理</span>
       </template>
@@ -31,21 +31,21 @@
           <span>用户管理</span>
         </el-menu-item>
         <el-menu-item index="/role">
-          <i class="el-icon-postcard"></i>
+          <i class="el-icon-s-custom"></i>
           <span>角色管理</span>
         </el-menu-item>
         <el-menu-item index="/menu">
-          <i class="el-icon-notebook-1"></i>
+          <i class="el-icon-menu"></i>
           <span>菜单管理</span>
         </el-menu-item>
       </el-menu-item-group>
     </el-submenu>
     <el-menu-item index="/dashboard">
-      <i class="el-icon-location"></i>
+      <i class="el-icon-data-line"></i>
       <span>数据报表</span>
     </el-menu-item>
     <el-menu-item index="/log">
-      <i class="el-icon-location"></i>
+      <i class="el-icon-toilet-paper"></i>
       <span>日志管理</span>
     </el-menu-item>
   </el-menu>
@@ -76,11 +76,12 @@ export default {
   align-items: center;
   padding-left: 22px;
   height: 60px;
+  font-size: 20px;
   color: #f3f5f7;
+  border-bottom: 1px solid #e4e4e4;
 
-  .icon {
-    font-size: 18px;
-    margin-right: 10px;
+  span {
+    font-size: 16px;
   }
 }
 </style>
