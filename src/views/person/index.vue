@@ -60,7 +60,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="所属企业">
-              <el-select filterable clearable placeholder="暂无选择" v-model="person.firmId" :disabled="person.roleId != 2">
+              <el-select filterable default-first-option clearable placeholder="暂无选择" v-model="person.firmId" :disabled="person.roleId != 2">
                 <el-option
                   v-for="item in allFirms"
                   :key="item.id"

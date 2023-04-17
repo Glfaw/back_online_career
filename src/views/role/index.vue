@@ -1,15 +1,15 @@
 <template>
   <section class="role_container">
     <!--  添加角色  -->
-    <el-dialog width="500px" title="角色信息" :visible.sync="dialogVisible" :before-close="handleClose">
-      <el-form label-position="left" label-width="80px" :model="dialogForm">
-        <el-form-item label="角色名称">
+    <el-dialog width="450px" title="角色信息" :visible.sync="roleDialogVisible" :before-close="handleClose">
+      <el-form label-position="left" label-width="50px" :model="dialogForm">
+        <el-form-item label="名称">
           <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model="dialogForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="角色标识">
+        <el-form-item label="标识">
           <el-input clearable prefix-icon="el-icon-s-flag" placeholder="角色标识" v-model="dialogForm.flag"></el-input>
         </el-form-item>
-        <el-form-item label="角色描述">
+        <el-form-item label="描述">
           <el-input clearable prefix-icon="el-icon-info" placeholder="角色描述" v-model="dialogForm.description"></el-input>
         </el-form-item>
       </el-form>
@@ -20,7 +20,19 @@
     </el-dialog>
 
     <!--  分配菜单  -->
+    <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible">
+      <el-tree
+        show-checkbox
+        ref="menuTree"
+        node-key="id"
+        :data="menuData"
+      ></el-tree>
 
+      <div slot="footer">
+        <el-button @click="menuDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleSaveMenu">确 定</el-button>
+      </div>
+    </el-dialog>
 
     <el-row :gutter="20">
       <el-col :span="6">
@@ -38,7 +50,7 @@
             </div>
             <el-divider>或者</el-divider>
             <div class="handle">
-              <el-button type="success" icon="el-icon-s-custom" @click="dialogVisible = true">添加角色</el-button>
+              <el-button type="success" icon="el-icon-s-custom" @click="roleDialogVisible = true">添加角色</el-button>
             </div>
           </el-form>
         </el-card>
@@ -52,7 +64,7 @@
             <el-table-column prop="description" label="角色描述"></el-table-column>
             <el-table-column label="操作" width="300" align="center">
               <template slot-scope="scope">
-                <el-button type="info" size="mini" icon="el-icon-menu">分配菜单</el-button>
+                <el-button type="info" size="mini" icon="el-icon-menu" @click="selectMenu(scope.row.id)">分配菜单</el-button>
                 <el-button class="mr_10" type="warning" size="mini" icon="el-icon-edit" @click="handleRowUpdate(scope.row)">编辑</el-button>
                 <el-popconfirm title="确定要删除吗" @confirm="handleRowDel(scope.row.id)">
                   <el-button slot="reference" type="danger" size="mini" icon="el-icon-remove-outline">删除</el-button>
@@ -85,8 +97,39 @@ export default {
         description: ''
       },
       tableData: [],
+      menuData: [
+        {
+          id: 1,
+          label: '首页'
+        }, {
+          id: 2,
+          label: '个人中心'
+        }, {
+          id: 3,
+          label: '系统管理',
+          children: [
+            {
+              id: 4,
+              label: '用户管理'
+            },{
+              id: 5,
+              label: '角色管理'
+            }, {
+              id: 6,
+              label: '菜单管理'
+            }
+          ]
+        }, {
+          id: 7,
+          label: '数据报表'
+        }, {
+          id: 8,
+          label: '日志管理'
+        }
+      ],
       addOrUpdate: false,
-      dialogVisible: false,
+      roleDialogVisible: false,
+      menuDialogVisible: false,
       isTableLoading: false,
     }
   },
@@ -107,12 +150,18 @@ export default {
       this.loadTable()
     },
     handleClose() {
-      this.dialogVisible = this.addOrUpdate = false
+      this.roleDialogVisible = this.addOrUpdate = false
       this.dialogForm.name = this.dialogForm.flag = this.dialogForm.description = ''
     },
     handleRowUpdate(row) {
-      this.dialogVisible = this.addOrUpdate = true;
+      this.roleDialogVisible = this.addOrUpdate = true;
       Object.assign(this.dialogForm, row);
+    },
+    selectMenu(id) {
+      this.menuDialogVisible = true
+    },
+    handleSaveMenu() {
+      console.log(this.$refs.menuTree.getCheckedKeys())
     },
     async handleRowDel(id) {
       try {

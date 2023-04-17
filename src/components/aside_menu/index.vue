@@ -27,7 +27,7 @@
       </template>
       <el-menu-item-group>
         <el-menu-item index="/user">
-          <i class="el-icon-user-solid"></i>
+          <i class="el-icon-user"></i>
           <span>用户管理</span>
         </el-menu-item>
         <el-menu-item index="/role">

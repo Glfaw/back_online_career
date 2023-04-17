@@ -109,7 +109,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="企业">
-                  <el-select filterable clearable size="mini" placeholder="请选择所属企业" v-model="formDialog.firmId" :disabled="formDialog.roleId != 2">
+                  <el-select filterable default-first-option clearable size="mini" placeholder="请选择所属企业" v-model="formDialog.firmId" :disabled="formDialog.roleId != 2">
                     <el-option
                       v-for="item in allFirms"
                       :key="item.id"
