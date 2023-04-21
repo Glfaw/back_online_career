@@ -13,7 +13,7 @@
       <span v-if="!isCollapse">网上招聘与求职</span>
     </div>
     <el-menu-item index="/">
-      <i class="el-icon-s-home"></i>
+      <i class="el-icon-house"></i>
       <span>首页</span>
     </el-menu-item>
     <el-menu-item index="/person">

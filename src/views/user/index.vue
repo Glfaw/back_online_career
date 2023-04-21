@@ -66,7 +66,7 @@
               <el-button size="small" icon="el-icon-close" @click="dialogInit">取消</el-button>
             </div>
           </div>
-          <el-form class="dialog" label-width="60px" label-position="left" :model="formDialog">
+          <el-form class="dialog" ref="card_form" label-width="60px" label-position="left" :model="formDialog">
             <el-row :gutter="40">
               <!-- 左侧 -->
               <el-col class="left" :span="9">
@@ -77,9 +77,7 @@
                     :show-file-list="false"
                     :before-upload="beforeUploadAvatar"
                     :http-request="handleUploadAvatar"
-                    :class="{avatar_border: !formDialog?.avatarUrl}"
-                    v-loading.fullscreen.lock="isFullScreenLoading"
-                  >
+                    :class="{avatar_border: !formDialog?.avatarUrl}">
                     <el-avatar
                       v-if="formDialog.avatarUrl"
                       fit="contain"
@@ -185,9 +183,9 @@
               :show-file-list="false"
               :http-request="handleUploadImport"
             >
-              <el-button type="info" class="ml_10 mr_10" icon="el-icon-download" v-loading.fullscreen.lock="isFullScreenLoading">导入</el-button>
+              <el-button type="info" class="ml_10 mr_10" icon="el-icon-download">导入</el-button>
             </el-upload>
-            <el-button type="primary" icon="el-icon-upload2" v-loading.fullscreen.lock="isFullScreenLoading" @click="handleUploadExport">导出</el-button>
+            <el-button type="primary" icon="el-icon-upload2" @click="handleUploadExport">导出</el-button>
           </div>
         </el-card>
       </el-col>
@@ -250,6 +248,7 @@
 import { mapState } from 'vuex'
 // 引入节流防抖，为用户自定义搜索节流、导出excel防抖
 import { debounce, throttle } from 'lodash'
+import { ShowMsg, ShowNotify, LoadingWrapper } from "@/utils/common"
 import { uploadAvatar, uploadExcelImport, uploadExcelExport } from '@/api/upload'
 import { addUser, deleteUserByID, getPagination, updateUser, deleteUserBySelect } from "@/api/user"
 
@@ -257,23 +256,19 @@ export default {
   name: "UserView",
   data() {
     return {
-      formSearch: {
-        username: "",
-        address: "",
-        phone: "",
-      },
+      formSearch: {},
       formDialog: {
         id: null,
         name: null,
-        gender: 1,
-        age: 20,
-        degree: 1,
         phone: null,
         email: null,
         address: null,
         avatarUrl: null,
         firmId: null,
-        roleId: 3
+        gender: 1,
+        degree: 1,
+        roleId: 3,
+        age: 20
       },
       tableData: [],
       seletionIds: [],
@@ -281,7 +276,6 @@ export default {
       pageSize: 10,
       total: 0,
       isTableLoading: false,
-      isFullScreenLoading: false,
       isInsertOrUpdate: true,
     };
   },
@@ -292,15 +286,12 @@ export default {
     ...mapState(['user', 'allRoles', 'allFirms'])
   },
   methods: {
-    showMsg(message, type = 'warning') {
-      this.$message({ type, message, showClose: true })
-    },
     handleNotify(title, message, type = 'warning') {
       this.$notify({ type, title, message, position: 'bottom-right' })
     },
     resetSearch() {
-      this.formSearch.username = this.formSearch.address = this.formSearch.phone = null;
-      this.getSearch();
+      this.formSearch = {}
+      this.getSearch()
     },
     handleSizeChange(val) {
       this.pageSize = val
@@ -311,7 +302,7 @@ export default {
       this.getSearch()
     },
     handleSelectChange(list) {
-      this.seletionIds = [...list.map(v => v.id)];
+      this.seletionIds = list.map(v => v.id)
     },
     // 初始化表单
     dialogInit() {
@@ -321,85 +312,82 @@ export default {
       this.formDialog.roleId = 3;
       this.formDialog.age = 20;
       this.formDialog.degree = this.formDialog.gender = 1;
+
       this.isInsertOrUpdate = true
     },
     // 表单角色发生变化时，按情况清空企业id
     dialogRoleChange(role) {
-      if(role != 2) {
+      if(role !== 2) {
         this.formDialog.firmId = null
       }
     },
     // 点击【编辑】，切换表单模式
     dialogUpdate(row) {
-      Object.assign(this.formDialog, row)
+      this.formDialog = {...row}
       this.isInsertOrUpdate = false
     },
     beforeUploadAvatar(file) {
       const isType = (file.type === 'image/jpeg') || (file.type === 'image/png')
       const isLt2M = (file.size / 1024 / 1024) < 2;
-      if(!isType) this.showMsg('图片类型只能是jpeg/png格式')
-      if(!isLt2M) this.showMsg('上传图片大小不能超过2M')
+      if(!isType) ShowMsg('图片类型只能是jpeg/png格式')
+      if(!isLt2M) ShowMsg('上传图片大小不能超过2M')
 
       return isType && isLt2M
     },
     async handleUploadAvatar({file}) {
-      this.isFullScreenLoading = true
+      const loadWrapper = LoadingWrapper({ target: this.$refs.card_form.$el })
       try {
         const formData = new FormData()
         formData.append('file', file)
 
         const res = await uploadAvatar(formData)
-        if(res.code == 200) {
-          this.showMsg('头像上传成功', 'success')
+        if(res.code === 200) {
+          ShowMsg('头像上传成功', 'success')
           this.formDialog.avatarUrl = res.data
-        }
-        else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       } finally {
-        this.isFullScreenLoading = false
+        loadWrapper.close()
       }
     },
     // 执行【新增】
     async handleInsert() {
       try {
         const res = await addUser(this.formDialog);
-        if(res.code == 200) {
-          this.showMsg('添加成功', 'success');
+        if(res.code === 200) {
+          ShowMsg('添加成功', 'success');
           this.dialogInit();
           this.getSearch();
-        }
-        else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       }
     },
     // 执行【修改】
     async handleUpdate() {
       try {
         const res = await updateUser(this.formDialog);
-        if(res.code == 200) {
-          this.showMsg('修改成功', 'success');
+        if(res.code === 200) {
+          ShowMsg('修改成功', 'success');
           this.dialogInit();
           this.getSearch();
-        }
-        else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       }
     },
     // 执行【删除】
     async handleRowDel(row) {
-      if(this.formDialog.id == row.id) this.dialogInit()
+      if(this.formDialog.id === row.id) this.dialogInit()
       try {
         const res = await deleteUserByID(row.id);
-        if(res.code == 200) {
-          this.showMsg('删除成功', 'success')
+        if(res.code === 200) {
+          ShowMsg('删除成功', 'success')
           this.getSearch()
-        }
-        else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       }
     },
     // 执行【批量删除】
@@ -407,18 +395,16 @@ export default {
       if(this.seletionIds.includes(this.formDialog.id)) this.dialogInit()
       try {
         const res = await deleteUserBySelect(this.seletionIds);
-        if(res.code == 200) {
-          this.showMsg('批量删除成功', 'success');
+        if(res.code === 200) {
+          ShowMsg('批量删除成功', 'success');
           this.getSearch();
-        }
-        else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       }
     },
     // 执行【导入】
     handleUploadImport: throttle(async function({ file }) {
-      this.isFullScreenLoading = true
       try {
         const formData = new FormData()
         formData.append('file', file)
@@ -430,16 +416,13 @@ export default {
         } else this.handleNotify(res.msg)
       } catch (error) {
         this.handleNotify(error.message, 'error')
-      } finally {
-        this.isFullScreenLoading = false
       }
     }, 500),
     // 执行【导出】
     handleUploadExport: debounce(async function() {
-      this.isFullScreenLoading = true
       try {
         const res = await uploadExcelExport()
-        if(res.status == 200) {
+        if(res.status === 200) {
           // 切割文件名
           const encodeFileName = res.headers['content-disposition'].split('filename=')[1]
           // 解码
@@ -461,8 +444,6 @@ export default {
         } else this.handleNotify('导出失败', `失败原因：${res.statusText}`)
       } catch (error) {
         this.handleNotify('导出异常', `异常原因：${error.message}`, 'error')
-      } finally {
-        this.isFullScreenLoading = false
       }
     }, 3000, { leading: true }),
     // 执行【分页】
@@ -472,16 +453,14 @@ export default {
         const res = await getPagination({
           pageNum: this.pageNum,
           pageSize: this.pageSize,
-          username: this.formSearch.username,
-          address: this.formSearch.address,
-          phone: this.formSearch.phone
+          ...this.formSearch
         })
-        if(res.code == 200) {
+        if(res.code === 200) {
           this.tableData = res.data.records;
           this.total = res.data.total;
-        } else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       } finally {
         this.isTableLoading = false
       }

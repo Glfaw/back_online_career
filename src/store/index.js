@@ -1,11 +1,21 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
+import { Notification } from "element-ui";
 import { getItem, setItem } from '@/utils/storage'
 import { getFirmList } from '@/api/user'
 import { getAllRoles } from "@/api/role"
+import { getDictIcon } from "@/api/menu"
 
 Vue.use(Vuex);
+
+function showMsg(message, title = '操作失败') {
+  return Notification({
+    type: 'error',
+    title,
+    message
+  })
+}
 
 const USER_KEY = 'ACCOUNT_USER'
 // 角色表
@@ -16,18 +26,22 @@ const FIRM_KEY = 'COMPANY_LIST'
 const actions = {
   // 请求角色权限
   async loadRoles(content) {
-    const res = await getAllRoles();
-    if(res.code == 200) {
-      content.commit('SET_ROLES', res.data)
+    try {
+      const res = await getAllRoles()
+      res.code === 200? content.commit('SET_ROLES', res.data): showMsg(res.msg, '角色列表-获取失败')
+    } catch (e) {
+      showMsg(e.message, '角色列表-获取异常')
     }
   },
   // 请求所有公司列表
   async loadFirms(content) {
-    const res = await getFirmList();
-    if(res.code == 200) {
-      content.commit('SET_FIRMS', res.data)
+    try {
+      const res = await getFirmList()
+      res.code === 200? content.commit('SET_FIRMS', res.data): showMsg(res.msg, '企业列表-获取失败')
+    } catch (e) {
+      showMsg(e.message, '企业列表-获取异常')
     }
-  }
+  },
 }
 
 const mutations = {

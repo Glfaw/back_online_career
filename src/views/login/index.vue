@@ -60,7 +60,8 @@
 
 <script>
 import { throttle } from 'lodash'
-import { login } from "@/api/user";
+import { login } from "@/api/user"
+import { ShowMsg, ShowNotify } from "@/utils/common"
 
 export default {
   name: "Login",
@@ -80,9 +81,6 @@ export default {
     };
   },
   methods: {
-    showMsg(message, type = "warning") {
-      this.$message({ showClose: true, type, message });
-    },
     // 表单校验
     formValidate() {
       this.$refs['ruleUserForm'].validate((valid) => {
@@ -98,11 +96,11 @@ export default {
       }
       try {
         const res = await login(user);
-        if (res.code == 300) {
-          this.showMsg(res.msg, "error");
+        if (res.code === 300) {
+          ShowMsg(res.msg, "error");
         } else {
           this.$store.commit("SET_USER", res.data);
-          this.$notify({
+          ShowNotify({
             type: 'success',
             title: '登录成功',
             position: 'bottom-right',
@@ -112,7 +110,7 @@ export default {
           this.$router.replace("/");
         }
       } catch (error) {
-        this.showMsg(error.message, "error");
+        ShowMsg(error.message, "error");
       }
     }, 200, {leading: true}),
   },

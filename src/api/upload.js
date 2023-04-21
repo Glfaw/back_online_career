@@ -5,8 +5,8 @@ import request from "@/utils/request";
 
 /**
  * 上传头像
- * @param {new FormData()} data 
- * @returns 
+ * @param data
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const uploadAvatar = data => {
   return request({
@@ -18,8 +18,8 @@ export const uploadAvatar = data => {
 
 /**
  * 导入excel
- * @param {new FormData()} data 
- * @returns 
+ * @param data
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const uploadExcelImport = data => {
   return request({
@@ -31,7 +31,7 @@ export const uploadExcelImport = data => {
 
 /**
  * 导出excel
- * @returns file
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const uploadExcelExport = () => {
   return request({

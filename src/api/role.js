@@ -5,6 +5,32 @@ import request from "@/utils/request";
  */
 
 /**
+ * 获取角色菜单
+ * @param roleId
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const getRoleMenu = roleId => {
+  return request({
+    method: 'GET',
+    url: `/role/${roleId}`
+  })
+}
+
+/**
+ * 分配角色菜单
+ * @param roleId
+ * @param data
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const divideRoleMenu = (roleId, data) => {
+  return request({
+    method: 'POST',
+    url: `/role/divide/${roleId}`,
+    data
+  })
+}
+
+/**
  * 获取所有角色
  * @returns {Promise<AxiosResponse<any>>}
  */

@@ -22,10 +22,11 @@
 </template>
 
 <script>
-import AsideMenu from "@/components/aside_menu";
-import HeaderUser from "@/components/header_user";
 import { mapState } from 'vuex'
 import { loadPersonal } from '@/api/user'
+import { ShowMsg } from "@/utils/common"
+import AsideMenu from "@/components/aside_menu"
+import HeaderUser from "@/components/header_user"
 
 export default {
   name: "Layout",
@@ -48,9 +49,6 @@ export default {
     },
   },
   methods: {
-    showMsg(message, type = 'warning') {
-      this.$message({type, message, showClose: true})
-    },
     handleCollapseChange() {
       this.isCollapse = !this.isCollapse;
     },
@@ -59,16 +57,16 @@ export default {
       Object.assign(this.user, data)
       this.user.token = token
       this.$store.commit('SET_USER', this.user)
-      this.showMsg('用户信息更新成功', 'success')
+      ShowMsg('用户信息更新成功', 'success')
     },
     async renovateUser(id) {
       try {
         const res = await loadPersonal(id)
-        if(res.code == 200) {
+        if(res.code === 200) {
           this.refreshStorage(res.data)
-        } else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       }
     }
   },

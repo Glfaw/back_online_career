@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import { ShowMsg, ShowNotify } from "@/utils/common";
+
 export default {
   name: "HeaderUser",
   props: {
@@ -74,7 +76,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$notify({
+        ShowNotify({
           type: 'warning',
           position: 'bottom-right',
           title: '已安全退出',
@@ -85,9 +87,7 @@ export default {
         this.$store.commit('SET_ROLES', null);
         this.$store.commit('SET_FIRMS', null);
         this.$router.replace('/login');
-      }).catch(() => {
-        this.$message({type: 'info', message: '已取消退出' });          
-      });
+      }).catch(() => ShowMsg('已取消退出', 'info'));
     }
   },
 };

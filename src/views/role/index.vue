@@ -1,7 +1,7 @@
 <template>
   <section class="role_container">
     <!--  添加角色  -->
-    <el-dialog width="450px" title="角色信息" :visible.sync="roleDialogVisible" :before-close="handleClose">
+    <el-dialog width="450px" title="角色信息" :visible.sync="roleDialogVisible" :before-close="roleDialogClose">
       <el-form label-position="left" label-width="50px" :model="dialogForm">
         <el-form-item label="名称">
           <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model="dialogForm.name"></el-input>
@@ -14,22 +14,29 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="handleClose">取 消</el-button>
+        <el-button @click="roleDialogClose">取 消</el-button>
         <el-button type="primary" @click="handleRoleForm">确 定</el-button>
       </div>
     </el-dialog>
 
     <!--  分配菜单  -->
-    <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible">
+    <el-dialog destroy-on-close width="450px" title="分配菜单" :visible.sync="menuDialogVisible">
       <el-tree
         show-checkbox
         ref="menuTree"
         node-key="id"
         :data="menuData"
-      ></el-tree>
+        :props="defaultProp"
+        :default-expanded-keys="expands"
+        :default-checked-keys="checks">
+        <div slot-scope="{ node, data }">
+          <i :class="data.icon"></i>
+          <span class="ml_5">{{ data.name }}</span>
+        </div>
+      </el-tree>
 
       <div slot="footer">
-        <el-button @click="menuDialogVisible = false">取 消</el-button>
+        <el-button @click="menuDialogClose">取 消</el-button>
         <el-button type="primary" @click="handleSaveMenu">确 定</el-button>
       </div>
     </el-dialog>
@@ -45,7 +52,7 @@
               <el-input clearable prefix-icon="el-icon-s-flag" placeholder="角色标识" v-model="formSearch.flag"></el-input>
             </el-form-item>
             <div class="handle">
-              <el-button type="primary" icon="el-icon-search" @click="loadTable">搜索</el-button>
+              <el-button type="primary" icon="el-icon-search" @click="loadRoleTable">搜索</el-button>
               <el-button icon="el-icon-refresh" @click="resetForm">重置</el-button>
             </div>
             <el-divider>或者</el-divider>
@@ -64,7 +71,7 @@
             <el-table-column prop="description" label="角色描述"></el-table-column>
             <el-table-column label="操作" width="300" align="center">
               <template slot-scope="scope">
-                <el-button type="info" size="mini" icon="el-icon-menu" @click="selectMenu(scope.row.id)">分配菜单</el-button>
+                <el-button type="info" size="mini" icon="el-icon-menu" @click="divideMenu(scope.row.id)">分配菜单</el-button>
                 <el-button class="mr_10" type="warning" size="mini" icon="el-icon-edit" @click="handleRowUpdate(scope.row)">编辑</el-button>
                 <el-popconfirm title="确定要删除吗" @confirm="handleRowDel(scope.row.id)">
                   <el-button slot="reference" type="danger" size="mini" icon="el-icon-remove-outline">删除</el-button>
@@ -80,53 +87,26 @@
 
 <script>
 import { mapState } from 'vuex'
+import { getMenuList } from "@/api/menu"
 import { debounce, throttle } from 'lodash'
-import { getSearchRoles, addRole, updateRole, deleteRole } from "@/api/role";
+import { ShowMsg, LoadingWrapper } from "@/utils/common"
+import { getSearchRoles, addRole, updateRole, deleteRole, getRoleMenu, divideRoleMenu } from "@/api/role";
 
 export default {
   name: 'RoleView',
   data() {
     return {
-      formSearch: {
-        name: '',
-        flag: ''
+      defaultProp: {
+        children: 'children',
+        label: 'name'
       },
-      dialogForm: {
-        name: '',
-        flag: '',
-        description: ''
-      },
+      formSearch: {},
+      dialogForm: {},
       tableData: [],
-      menuData: [
-        {
-          id: 1,
-          label: '首页'
-        }, {
-          id: 2,
-          label: '个人中心'
-        }, {
-          id: 3,
-          label: '系统管理',
-          children: [
-            {
-              id: 4,
-              label: '用户管理'
-            },{
-              id: 5,
-              label: '角色管理'
-            }, {
-              id: 6,
-              label: '菜单管理'
-            }
-          ]
-        }, {
-          id: 7,
-          label: '数据报表'
-        }, {
-          id: 8,
-          label: '日志管理'
-        }
-      ],
+      menuData: [],
+      expands: [],
+      checks: [],
+      divideRoleId: null,
       addOrUpdate: false,
       roleDialogVisible: false,
       menuDialogVisible: false,
@@ -135,44 +115,76 @@ export default {
   },
   created() {
     if (this.user && this.user.token) {
-      this.loadTable()
+      this.loadRoleTable()
+      this.loadMenuList()
     }
   },
   computed: {
-    ...mapState(['user'])
+    ...mapState(['user']),
   },
   methods: {
-    showMsg(message, type = 'warning') {
-      this.$message({ type, message, showClose: true })
-    },
     resetForm() {
-      this.formSearch.name = this.formSearch.flag = ''
-      this.loadTable()
+      this.formSearch = {}
+      this.loadRoleTable()
     },
-    handleClose() {
+    roleDialogClose() {
       this.roleDialogVisible = this.addOrUpdate = false
-      this.dialogForm.name = this.dialogForm.flag = this.dialogForm.description = ''
+      this.dialogForm = {}
+    },
+    menuDialogClose() {
+      this.menuDialogVisible = false
+      this.divideRoleId = this.checks = null
     },
     handleRowUpdate(row) {
       this.roleDialogVisible = this.addOrUpdate = true;
-      Object.assign(this.dialogForm, row);
+      this.dialogForm = {...row}
     },
-    selectMenu(id) {
+    // 打开分配菜单对话框
+    divideMenu: debounce(function(roleId) {
       this.menuDialogVisible = true
+      this.divideRoleId = roleId
+
+      // 获取对应角色的菜单id
+      this.$nextTick(() => this.handleGetRoleMenu())
+    }, 300, { leading: true }),
+    // 绑定指定角色的对应菜单，为角色分配菜单
+    async handleSaveMenu() {
+      try {
+        const list = this.$refs.menuTree.getCheckedKeys()
+        const res = await divideRoleMenu(this.divideRoleId, list)
+        if (res.code === 200) {
+          ShowMsg('角色菜单分配成功', 'success')
+          this.menuDialogClose()
+        } else ShowMsg(res.msg)
+      } catch (e) {
+        ShowMsg(e.message, 'error')
+      }
     },
-    handleSaveMenu() {
-      console.log(this.$refs.menuTree.getCheckedKeys())
+    // 获取指定角色的对应菜单列表id
+    async handleGetRoleMenu() {
+      // 生成加载菜单蒙板
+      const loadTree = LoadingWrapper({target: this.$refs.menuTree.$el})
+      try {
+        const res = await getRoleMenu(this.divideRoleId)
+        if (res.code === 200) {
+          this.checks = res.data
+        } else ShowMsg(res.msg)
+      } catch (e) {
+        ShowMsg(e.message, 'error')
+      } finally {
+        loadTree.close()
+      }
     },
     async handleRowDel(id) {
       try {
         const res = await deleteRole(id)
         if (res.code === 200) {
-          this.showMsg('删除成功', 'success')
-          this.loadTable()
+          ShowMsg('删除成功', 'success')
+          this.loadRoleTable()
           this.$store.dispatch('loadRoles');
-        } else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (e) {
-        this.showMsg(e.message, 'error')
+        ShowMsg(e.message, 'error')
       }
     },
     async handleRoleForm() {
@@ -180,31 +192,39 @@ export default {
         const flag = this.addOrUpdate
         const res = flag? await updateRole(this.dialogForm): await addRole(this.dialogForm)
         if (res.code === 200) {
-          this.handleClose()
-          this.showMsg(flag? '修改角色信息成功': '添加角色成功', 'success')
-          this.loadTable()
+          this.roleDialogClose()
+          ShowMsg(flag? '修改角色信息成功': '添加角色成功', 'success')
+          this.loadRoleTable()
           this.$store.dispatch('loadRoles');
-        } else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (e) {
-        this.showMsg(e.message, 'error')
+        ShowMsg(e.message, 'error')
       }
     },
-    loadTable: throttle(async function() {
+    loadRoleTable: debounce(async function() {
       this.isTableLoading = true;
       try {
-        const res = await getSearchRoles({
-          name: this.formSearch.name,
-          flag: this.formSearch.flag
-        })
+        const res = await getSearchRoles(this.formSearch)
         if (res.code === 200) {
           this.tableData = res.data
-        } else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (e) {
-        this.showMsg(e.message, 'error')
+        ShowMsg(e.message, 'error')
       } finally {
         this.isTableLoading = false
       }
-    }, 500, { leading: true })
+    }, 500, { leading: true }),
+    loadMenuList: throttle(async function() {
+      try {
+        const res = await getMenuList()
+        if (res.code === 200) {
+          this.menuData = res.data
+          this.expands = this.menuData.map(v => v.id)
+        } else ShowMsg(res.msg)
+      } catch (e) {
+        ShowMsg(e.message, 'error')
+      }
+    }, 300)
   }
 }
 </script>

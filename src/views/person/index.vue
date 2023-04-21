@@ -1,6 +1,5 @@
 <template>
   <section class="person_container">
-    <loading-wrapper :label="loadingLabel" :isLoading="isLoading" />
     <el-row :gutter="10">
       <el-col :span="6">
         <el-card class="person_info">
@@ -110,29 +109,24 @@
 </template>
 
 <script>
-import LoadingWrapper from '@/components/loading_wrapper'
 import { mapState } from 'vuex'
 import { uploadAvatar } from '@/api/upload'
+import { LoadingWrapper, ShowMsg } from "@/utils/common"
 import { loadPersonal, refreshPersonal } from '@/api/user'
 export default {
   name: 'PersonView',
-  components: { LoadingWrapper },
   data() {
     return {
       isFormEdit: false,
-      isLoading: false,
-      loadingLabel: '',
       person: {}
     }
   },
   created() {
     if(this.user?.id)
     {
-      this.isLoading = true
-      this.loadingLabel = '正在获取个人信息'
       this.handleGetPerson()
     }
-    else this.showMsg('请先登录', 'error')
+    else ShowMsg('请先登录', 'error')
   },
   computed: {
     ...mapState(['allFirms', 'user']),
@@ -141,46 +135,42 @@ export default {
     handleRoleChange(role) {
       if(role !== 2) this.person.firmId = null
     },
-    showMsg(message, type='warning') {
-      this.$message({ type, message, showClose: true })
-    },
     beforeUploadAvatar(file) {
       const isType = (file.type === 'image/jpeg') || (file.type === 'image/png')
       const isLt2M = (file.size / 1024 / 1024) < 2;
-      if(!isType) this.showMsg('图片类型只能是jpeg/png格式')
-      if(!isLt2M) this.showMsg('上传图片大小不能超过2M')
+      if(!isType) ShowMsg('图片类型只能是jpeg/png格式')
+      if(!isLt2M) ShowMsg('上传图片大小不能超过2M')
 
       return isType && isLt2M
     },
     async handleUploadAvatar({file}) {
-      this.isLoading = true;
-      this.loadingLabel = '图片上传中...'
+      const loadWrapper = LoadingWrapper({ target: this.$el, text: '图片上传中...' })
       try {
         const formData = new FormData();
         formData.append('file', file)
 
         const res = await uploadAvatar(formData)
         if(res.code === 200) {
-          this.showMsg('图片上传成功，请点击保存完成修改')
+          ShowMsg('图片上传成功，请点击保存完成修改')
           this.person.avatarUrl = res.data
-        }
-        else this.showMsg(res.msg)
+        } else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       } finally {
-        this.isLoading = false
+        loadWrapper.close()
       }
     },
     async handleGetPerson() {
       this.isFormEdit = false;
+      const loadWrapper = LoadingWrapper({ target: this.$el })
       try {
         const res = await loadPersonal(this.user.id);
         if(res.code === 200) this.person = res.data
-        else this.showMsg(res.msg)
+        else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       } finally {
-        this.isLoading = false
+        loadWrapper.close()
       }
     },
     async handleUpdatePerson() {
@@ -190,9 +180,9 @@ export default {
           this.isFormEdit = false
           this.$emit('refreshUser', this.person.id)
         }
-        else this.showMsg(res.msg)
+        else ShowMsg(res.msg)
       } catch (error) {
-        this.showMsg(error.message, 'error')
+        ShowMsg(error.message, 'error')
       }
     },
   }
@@ -205,7 +195,7 @@ export default {
   .person_info {
     .info_header {
       .el-form-item {
-        margin-bottom: 0px;
+        margin-bottom: unset;
       }
     }
   }  
