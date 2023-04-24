@@ -26,7 +26,7 @@ const router = new VueRouter({
 
 export const setRoutes = function (){
   const treeMenu = store.state.treeMenu
-  if (treeMenu.length === 0) return false
+  if (treeMenu === null) return false
 
   const baseRoute = { path: '/', name: 'layout', component: () => import('@/views/layout'), redirect: '/home', children: [] }
   treeMenu.forEach(menu => {
