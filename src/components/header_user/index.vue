@@ -35,6 +35,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    isLoading: {
+      type: Boolean,
+      required: true
+    },
     user: {
       type: Object,
       default: null
@@ -52,7 +56,9 @@ export default {
   },
   methods: {
     toggleBtn() {
-      this.$emit("changeCollapse");
+      if (this.isLoading) {
+        return false
+      } else this.$emit("changeCollapse")
     },
     // 用户菜单
     handleCommand(command) {
@@ -83,9 +89,10 @@ export default {
           message: '欢迎下次登录~',
         })
 
-        this.$store.commit('SET_USER', null);
-        this.$store.commit('SET_ROLES', null);
-        this.$store.commit('SET_FIRMS', null);
+        this.$store.commit('SET_USER', null)
+        this.$store.commit('SET_ROLES', null)
+        this.$store.commit('SET_FIRMS', null)
+        this.$store.commit('SET_MENUS', null)
         this.$router.replace('/login');
       }).catch(() => ShowMsg('已取消退出', 'info'));
     }

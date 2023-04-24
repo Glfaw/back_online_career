@@ -1,12 +1,13 @@
 <template>
   <el-container class="layout">
+    <!--  侧边菜单  -->
     <el-aside class="aside_container" :width="`${asideWidth}px`">
       <aside-menu class="aside_menu" :isCollapse="isCollapse" />
     </el-aside>
     <el-container>
       <!-- 头部区域 -->
-      <el-header style="border-bottom: 1px solid #e4e4e4">
-        <header-user :user="user" :isCollapse="isCollapse" @changeCollapse="handleCollapseChange" />
+      <el-header>
+        <header-user :user="user" :isCollapse="isCollapse" :isLoading="isLoading" @changeCollapse="handleCollapseChange" />
       </el-header>
 
       <!-- 内容区域 -->
@@ -15,7 +16,10 @@
           <i class="el-icon-caret-top"></i>
         </el-backtop>
         <!-- 子路由出口 -->
-        <router-view @refreshUser="renovateUser" />
+        <router-view
+          @refreshUser="reSetUser"
+          @refreshRouteMenu="refreshRouteMenu"
+        />
       </el-main>
     </el-container>
   </el-container>
@@ -23,23 +27,25 @@
 
 <script>
 import { mapState } from 'vuex'
-import { loadPersonal } from '@/api/user'
-import { ShowMsg } from "@/utils/common"
 import AsideMenu from "@/components/aside_menu"
 import HeaderUser from "@/components/header_user"
+import { ShowMsg, LoadingWrapper } from "@/utils/common"
+import { loadRouteMenu, loadPersonal } from "@/api/purview"
 
 export default {
   name: "Layout",
   components: { AsideMenu, HeaderUser },
   data() {
     return {
-      isCollapse: false, 
+      menu: [],
+      isCollapse: false,
+      isLoading: false
     };
   },
-  created() {
+  mounted() {
     if(this.user?.token) {
-      this.$store.dispatch('loadRoles');
-      this.$store.dispatch('loadFirms');
+      this.$store.dispatch('loadRoles')
+      this.$store.dispatch('loadFirms')
     }
   },
   computed: {
@@ -52,23 +58,24 @@ export default {
     handleCollapseChange() {
       this.isCollapse = !this.isCollapse;
     },
-    refreshStorage(data) {
+    refreshUser(data) {
       let token = this.user.token
       Object.assign(this.user, data)
       this.user.token = token
       this.$store.commit('SET_USER', this.user)
-      ShowMsg('用户信息更新成功', 'success')
+      this.$store.dispatch('loadMenus', this.user)
     },
-    async renovateUser(id) {
+    refreshRouteMenu() {
+      this.reSetUser(this.user.id)
+    },
+    async reSetUser(id) {
       try {
-        const res = await loadPersonal(id)
-        if(res.code === 200) {
-          this.refreshStorage(res.data)
-        } else ShowMsg(res.msg)
-      } catch (error) {
-        ShowMsg(error.message, 'error')
+        const {code, data, msg} = await loadPersonal(id)
+        code === 200? this.refreshUser(data): ShowMsg(msg)
+      } catch (e) {
+        ShowMsg(e.message, 'error')
       }
-    }
+    },
   },
 };
 </script>
@@ -83,9 +90,9 @@ export default {
   }
 
   .aside_container {
-    box-shadow: 2px 0 6px rgb(0 21 41 / 35%);
-
     .aside_menu {
+      display: flex;
+      flex-flow: column nowrap;
       height: 100vh;
       overflow: hidden;
     }

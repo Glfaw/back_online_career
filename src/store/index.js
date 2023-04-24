@@ -1,21 +1,13 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-import { Notification } from "element-ui";
-import { getItem, setItem } from '@/utils/storage'
-import { getFirmList } from '@/api/user'
-import { getAllRoles } from "@/api/role"
-import { getDictIcon } from "@/api/menu"
+import {getFirmList} from '@/api/user'
+import {getAllRoles} from "@/api/role"
+import {ShowNotify} from "@/utils/common"
+import {getItem, setItem} from '@/utils/storage'
+import {loadRouteMenu} from '@/api/purview'
 
 Vue.use(Vuex);
-
-function showMsg(message, title = '操作失败') {
-  return Notification({
-    type: 'error',
-    title,
-    message
-  })
-}
 
 const USER_KEY = 'ACCOUNT_USER'
 // 角色表
@@ -23,30 +15,51 @@ const ROLE_KEY = 'ROLE_POWER'
 // 公司表
 const FIRM_KEY = 'COMPANY_LIST'
 
+const MENU_KEY = 'MENU_USER'
+
+function notify(title, message, type = 'warning') {
+  ShowNotify({type, title, message})
+}
+
 const actions = {
   // 请求角色权限
   async loadRoles(content) {
     try {
-      const res = await getAllRoles()
-      res.code === 200? content.commit('SET_ROLES', res.data): showMsg(res.msg, '角色列表-获取失败')
+      const {code, data, msg} = await getAllRoles()
+      code === 200
+        ? content.commit('SET_ROLES', data)
+        : notify('角色列表-获取失败', msg)
     } catch (e) {
-      showMsg(e.message, '角色列表-获取异常')
+      notify('角色列表-获取异常', e.message, 'error')
     }
   },
   // 请求所有公司列表
   async loadFirms(content) {
     try {
-      const res = await getFirmList()
-      res.code === 200? content.commit('SET_FIRMS', res.data): showMsg(res.msg, '企业列表-获取失败')
+      const {code, data, msg} = await getFirmList()
+      code === 200
+        ? content.commit('SET_FIRMS', data)
+        : notify('企业列表-获取失败', msg)
     } catch (e) {
-      showMsg(e.message, '企业列表-获取异常')
+      notify('企业列表-获取异常', e.message, 'error')
     }
   },
+  // 加载菜单
+  async loadMenus(content, user) {
+    try {
+      const {code, data, msg} = await loadRouteMenu(user)
+      code === 200
+        ? content.commit('SET_MENUS', data)
+        : notify('用户菜单-获取失败', msg)
+    } catch (e) {
+      notify('用户菜单-获取异常', e.message, 'error')
+    }
+  }
 }
 
 const mutations = {
   // 设置用户
-  SET_USER(state, data) {
+  async SET_USER(state, data) {
     state.user = data
     setItem(USER_KEY, state.user)
   },
@@ -60,16 +73,21 @@ const mutations = {
     state.allFirms = data
     setItem(FIRM_KEY, state.allFirms)
   },
+  SET_MENUS(state, data) {
+    state.treeMenu = data
+    setItem(MENU_KEY, state.treeMenu)
+  },
 }
 
 const state = {
   user: getItem(USER_KEY),
   allRoles: getItem(ROLE_KEY),
   allFirms: getItem(FIRM_KEY),
+  treeMenu: getItem(MENU_KEY)
 }
 
 export default new Vuex.Store({
   state,
   actions,
-  mutations,
+  mutations
 });

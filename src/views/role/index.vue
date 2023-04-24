@@ -20,15 +20,14 @@
     </el-dialog>
 
     <!--  分配菜单  -->
-    <el-dialog destroy-on-close width="450px" title="分配菜单" :visible.sync="menuDialogVisible">
+    <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible" :before-close="menuDialogClose">
       <el-tree
         show-checkbox
         ref="menuTree"
         node-key="id"
         :data="menuData"
         :props="defaultProp"
-        :default-expanded-keys="expands"
-        :default-checked-keys="checks">
+        :default-expanded-keys="expendMenu">
         <div slot-scope="{ node, data }">
           <i :class="data.icon"></i>
           <span class="ml_5">{{ data.name }}</span>
@@ -104,8 +103,7 @@ export default {
       dialogForm: {},
       tableData: [],
       menuData: [],
-      expands: [],
-      checks: [],
+      expendMenu: [],
       divideRoleId: null,
       addOrUpdate: false,
       roleDialogVisible: false,
@@ -133,7 +131,8 @@ export default {
     },
     menuDialogClose() {
       this.menuDialogVisible = false
-      this.divideRoleId = this.checks = null
+      this.divideRoleId = null
+      this.$refs.menuTree.setCheckedKeys([])
     },
     handleRowUpdate(row) {
       this.roleDialogVisible = this.addOrUpdate = true;
@@ -145,7 +144,7 @@ export default {
       this.divideRoleId = roleId
 
       // 获取对应角色的菜单id
-      this.$nextTick(() => this.handleGetRoleMenu())
+      this.$nextTick(this.handleGetRoleMenu)
     }, 300, { leading: true }),
     // 绑定指定角色的对应菜单，为角色分配菜单
     async handleSaveMenu() {
@@ -154,7 +153,10 @@ export default {
         const res = await divideRoleMenu(this.divideRoleId, list)
         if (res.code === 200) {
           ShowMsg('角色菜单分配成功', 'success')
+          const tmp = this.divideRoleId
+          const {roleId} = this.user
           this.menuDialogClose()
+          if (tmp === roleId) this.$emit('refreshRouteMenu')
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')
@@ -167,7 +169,7 @@ export default {
       try {
         const res = await getRoleMenu(this.divideRoleId)
         if (res.code === 200) {
-          this.checks = res.data
+          this.$refs.menuTree.setCheckedKeys(res.data)
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')
@@ -219,7 +221,7 @@ export default {
         const res = await getMenuList()
         if (res.code === 200) {
           this.menuData = res.data
-          this.expands = this.menuData.map(v => v.id)
+          this.expendMenu = this.menuData.map(m => m.id)
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')

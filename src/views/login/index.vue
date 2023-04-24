@@ -12,7 +12,7 @@
       <!-- S 登录表单 -->
       <div class="login_form">
         <div class="section">
-          <img class="logo" src="~@/assets/logo.png" alt="" />
+          <img class="logo" src="~@/assets/login/lg.png" alt="" style="border-radius: 10px" />
           <h2 class="header">后台管理</h2>
         </div>
         <el-form class="data" :rules="rules" :model="user" ref="ruleUserForm">
@@ -48,8 +48,8 @@
         </el-form>
         <!-- S 表单背景 -->
         <div class="form_bg">
-          <img class="ball" src="~@/assets/loginBg/img1.png" alt="" />
-          <img class="per" src="~@/assets/loginBg/img2.png" alt="" />
+          <img class="ball" src="~@/assets/login/img1.png" alt="" />
+          <img class="per" src="~@/assets/login/img2.png" alt="" />
         </div>
         <!-- E 表单背景 -->
       </div>
@@ -59,17 +59,18 @@
 </template>
 
 <script>
-import { throttle } from 'lodash'
-import { login } from "@/api/user"
-import { ShowMsg, ShowNotify } from "@/utils/common"
+import {throttle} from 'lodash'
+import {login} from "@/api/purview"
+import {ShowMsg, ShowNotify} from "@/utils/common"
+import {setRoutes} from '@/router'
 
 export default {
   name: "Login",
   data() {
     return {
       user: {
-        account: null,
-        password: "",
+        account: 906645272,
+        password: '123',
       },
       rules: {
         account: [
@@ -95,24 +96,25 @@ export default {
         password: this.user.password
       }
       try {
-        const res = await login(user);
-        if (res.code === 300) {
-          ShowMsg(res.msg, "error");
+        const {code, data, msg} = await login(user);
+        if (code === 300) {
+          ShowMsg(msg, "error")
         } else {
-          this.$store.commit("SET_USER", res.data);
+          this.$store.commit("SET_USER", data)
+          this.$store.dispatch('loadMenus', data)
           ShowNotify({
             type: 'success',
             title: '登录成功',
             position: 'bottom-right',
             message: '欢迎使用本系统~'
           })
-
-          this.$router.replace("/");
+          setRoutes()
+          this.$router.push("/").catch(() => true)
         }
       } catch (error) {
-        ShowMsg(error.message, "error");
+        ShowMsg(error.message, "error")
       }
-    }, 200, {leading: true}),
+    }, 200),
   },
 };
 </script>

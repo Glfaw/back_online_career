@@ -112,7 +112,8 @@
 import { mapState } from 'vuex'
 import { uploadAvatar } from '@/api/upload'
 import { LoadingWrapper, ShowMsg } from "@/utils/common"
-import { loadPersonal, refreshPersonal } from '@/api/user'
+import { loadPersonal, refreshPersonal } from "@/api/purview"
+
 export default {
   name: 'PersonView',
   data() {
@@ -121,7 +122,7 @@ export default {
       person: {}
     }
   },
-  created() {
+  mounted() {
     if(this.user?.id)
     {
       this.handleGetPerson()
@@ -144,7 +145,7 @@ export default {
       return isType && isLt2M
     },
     async handleUploadAvatar({file}) {
-      const loadWrapper = LoadingWrapper({ target: this.$el, text: '图片上传中...' })
+      const loadWrapper = LoadingWrapper({ target: this.$el.parentElement, text: '图片上传中...' })
       try {
         const formData = new FormData();
         formData.append('file', file)
@@ -162,7 +163,8 @@ export default {
     },
     async handleGetPerson() {
       this.isFormEdit = false;
-      const loadWrapper = LoadingWrapper({ target: this.$el })
+
+      const loadWrapper = LoadingWrapper({ target: this.$el.parentElement, text: '加载中...' })
       try {
         const res = await loadPersonal(this.user.id);
         if(res.code === 200) this.person = res.data

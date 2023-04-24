@@ -14,12 +14,12 @@ request.interceptors.request.use(
       ? 'mutipart/form-data;charset=utf-8'
       : 'application/json;charset=utf-8'
 
-    const { user } = store.state;
+    const { user } = store.state
     // // 携带token
     if(user && user.token)
       config.headers['Authorization'] = `${user.token}`
       
-    return config;
+    return config
   },
   error => Promise.reject(error)
 )

@@ -1,25 +1,12 @@
 import request from "@/utils/request"
 /**
- * 用户模块
+ * 用户管理模块
  */
 
 /**
- * 用户登录
- * @param {*} data Map{account, password}
- * @returns 
- */
-export const login = data => {
-  return request({
-    method: 'POST',
-    url: '/user/login',
-    data
-  })
-}
-
-/**
- * 用户分页搜索
- * @param {*} params Query{name, address, phone}
- * @returns 
+ * 分页搜索
+ * @param params
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const getPagination = params => {
   return request({
@@ -31,7 +18,7 @@ export const getPagination = params => {
 
 /**
  * 获取所有公司列表
- * @returns Array[...]
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const getFirmList = () => {
   return request({
@@ -41,9 +28,9 @@ export const getFirmList = () => {
 }
 
 /**
- * 用户添加
- * @param {*} data User{...}
- * @returns 
+ * 添加用户
+ * @param data
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const addUser = data => {
   return request({
@@ -54,9 +41,9 @@ export const addUser = data => {
 }
 
 /**
- * 根据id删除
- * @param {*} id UID
- * @returns 
+ * 根据id删除用户
+ * @param id
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const deleteUserByID = id => {
   return request({
@@ -67,8 +54,8 @@ export const deleteUserByID = id => {
 
 /**
  * 用户批量删除
- * @param {*} data Array[...]
- * @returns 
+ * @param data
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const deleteUserBySelect = data => {
   return request({
@@ -79,39 +66,14 @@ export const deleteUserBySelect = data => {
 }
 
 /**
- * 用户更改
- * @param {*} data User{...}
- * @returns 
+ * 更改用户信息
+ * @param data
+ * @returns {Promise<AxiosResponse<any>>}
  */
 export const updateUser = data => {
   return request({
     method: 'PUT',
     url: '/user',
-    data
-  })
-}
-
-/**
- * 获取个人信息
- * @param {*} id UID
- * @returns 
- */
-export const loadPersonal = id => {
-  return request({
-    method: 'GET',
-    url: `/user/${id}`
-  })
-}
-
-/**
- * 更改个人信息
- * @param {*} data User{...}
- * @returns 
- */
-export const refreshPersonal = data => {
-  return request({
-    method: 'PUT',
-    url: '/user/person',
     data
   })
 }

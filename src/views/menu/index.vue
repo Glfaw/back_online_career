@@ -102,6 +102,7 @@ export default {
         if (res.code === 200) {
           ShowMsg('菜单删除成功', 'success')
           this.loadMenu()
+          this.$emit('refreshRouteMenu')
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')
@@ -138,9 +139,10 @@ export default {
       try {
         const res = this.addOrUpdate ? await addMenu(this.menuForm): await updateMenu(this.menuForm)
         if (res.code === 200) {
-          ShowMsg('菜单信息更新成功', 'success')
           this.handleDialogClose()
           this.loadMenu()
+          this.$emit('refreshRouteMenu')
+          ShowMsg('菜单信息更新成功', 'success')
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')

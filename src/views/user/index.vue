@@ -62,7 +62,7 @@
               <el-button size="small" icon="el-icon-refresh" @click="dialogInit">重置</el-button>
             </div>
             <div v-else class="fl_r command">
-              <el-button size="small" type="info" icon="el-icon-notebook-2" @click="handleUpdate">保存</el-button>
+              <el-button size="small" type="warning" icon="el-icon-notebook-2" @click="handleUpdate">保存</el-button>
               <el-button size="small" icon="el-icon-close" @click="dialogInit">取消</el-button>
             </div>
           </div>

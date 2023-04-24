@@ -1,22 +1,8 @@
-import store from "@/store";
 import Vue from "vue";
-// import store from "@/store";
+import store from "@/store";
 import VueRouter from "vue-router";
 
 Vue.use(VueRouter);
-
-const originalPush = VueRouter.prototype.push
-const originalReplace = VueRouter.prototype.replace
-// push
-VueRouter.prototype.push = function push (location, onResolve, onReject) {
-  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
-  return originalPush.call(this, location).catch(err => err)
-}
-// replace
-VueRouter.prototype.replace = function replace (location, onResolve, onReject) {
-  if (onResolve || onReject) return originalReplace.call(this, location, onResolve, onReject)
-  return originalReplace.call(this, location).catch(err => err)
-}
 
 const routes = [
   {
@@ -26,51 +12,10 @@ const routes = [
     meta: {title: '欢迎登录'}
   },
   {
-    path: "/",
-    component: () => import("@/views/layout"),
-    children: [
-      {
-        path: "",
-        name: "home",
-        component: () => import("@/views/home"),
-      },
-      {
-        path: "/user",
-        name: "user",
-        component: () => import("@/views/user"),
-        meta: {title: '用户管理'}
-      },
-      {
-        path: "/person",
-        name: "person",
-        component: () => import("@/views/person"),
-        meta: {title: '个人中心'}
-      },
-      {
-        path: "/role",
-        name: "role",
-        component: () => import("@/views/role"),
-        meta: {title: '角色管理'}
-      },
-      {
-        path: "/menu",
-        name: "menu",
-        component: () => import("@/views/menu"),
-        meta: {title: '菜单管理'}
-      },
-      {
-        path: "/dashboard",
-        name: "dashboard",
-        component: () => import("@/views/dashboard"),
-        meta: {title: '数据报表'}
-      },
-      {
-        path: "/log",
-        name: "log",
-        component: () => import("@/views/log"),
-        meta: {title: '日志管理'}
-      }
-    ]
+    path: '/status/404',
+    name: '404',
+    component: () => import('@/views/status/404'),
+    meta: {title: '错误访问'}
   },
 ];
 
@@ -78,6 +23,56 @@ const router = new VueRouter({
   mode: 'history',
   routes,
 });
+
+export const setRoutes = function (){
+  const treeMenu = store.state.treeMenu
+  if (treeMenu.length === 0) return false
+
+  const baseRoute = { path: '/', name: 'layout', component: () => import('@/views/layout'), redirect: '/home', children: [] }
+  treeMenu.forEach(menu => {
+    if (menu.path) {
+      baseRoute.children.push({
+        path: menu.path.replace('/', ''),
+        name: menu.path.replace('/', ''),
+        component: () => import(`@/views${menu.path}`),
+        meta: {
+          id: menu.id,
+          title: menu.name,
+          icon: menu.icon,
+          description: menu.description,
+          ordered: menu.ordered
+        }
+      })
+    } else if (menu.children?.length) {
+      menu.children.forEach(sub => {
+        if (sub.path) {
+          baseRoute.children.push({
+            path: sub.path.replace('/', ''),
+            name: sub.path.replace('/', ''),
+            component: () => import(`@/views${sub.path}`),
+            meta: {
+              id: sub.id,
+              title: sub.name,
+              icon: sub.icon,
+              description: sub.description,
+              ordered: sub.ordered
+            }
+          })
+        }
+      })
+    }
+  })
+
+  const current = router.getRoutes().map(r => r.name)
+  if (!current.includes('layout')) {
+    router.addRoute(baseRoute)
+    router.addRoute({
+      path: '/:pathMatch(.*)*',
+      redirect: '/status/404'
+    })
+  }
+}
+setRoutes()
 
 // 前置守卫逻辑
 function beforeRoute(to, from, next) {
@@ -94,7 +89,7 @@ function beforeRoute(to, from, next) {
 
 // 后置守卫逻辑
 function afterRoute(to, from) {
-  document.title = to.meta?.title || '网上求职与招聘系统'
+  document.title = to.meta?.title || '我的后台'
 }
 
 // 全局前置路由守卫

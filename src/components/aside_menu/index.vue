@@ -1,71 +1,75 @@
 <template>
   <el-menu
     router
-    :default-active="$route.path"
-    background-color="#545c64"
-    text-color="#fff"
-    active-text-color="#ffd04b"
-    :collapse-transition="false"
+    ref="elMenu"
+    unique-opened
+    text-color="#eee"
+    active-text-color="#409EFF"
+    background-color="#304156"
     :collapse="isCollapse"
-  >
+    :collapse-transition="false"
+    :default-active="$route.path">
     <div class="aside_logo">
-      <i class="el-icon-s-shop mr_10"></i>
+      <i class="icon mr_5"></i>
       <span v-if="!isCollapse">网上招聘与求职</span>
     </div>
-    <el-menu-item index="/">
-      <i class="el-icon-house"></i>
-      <span>首页</span>
-    </el-menu-item>
-    <el-menu-item index="/person">
-      <i class="el-icon-monitor"></i>
-      <span>个人中心</span>
-    </el-menu-item>
-    <el-submenu index="sys">
-      <template slot="title">
-        <i class="el-icon-setting"></i>
-        <span>系统管理</span>
+    <div class="aside_content">
+      <template v-for="menu in treeMenu">
+        <el-menu-item :key="menu.id" :index="menu.path" v-if="menu.path">
+          <i :class="menu.icon"></i>
+          <span slot="title">{{ menu.name }}</span>
+        </el-menu-item>
+        <el-submenu :key="menu.id" :index="`${menu.id}`" v-else>
+          <template slot="title">
+            <i :class="menu.icon"></i>
+            <span v-if="!isCollapse" slot="title">{{ menu.name }}</span>
+          </template>
+          <template v-for="sub in menu.children">
+            <el-menu-item :key="sub.id" :index="sub.path">
+              <i :class="sub.icon"></i>
+              <span slot="title">{{ sub.name }}</span>
+            </el-menu-item>
+          </template>
+        </el-submenu>
       </template>
-      <el-menu-item-group>
-        <el-menu-item index="/user">
-          <i class="el-icon-user"></i>
-          <span>用户管理</span>
-        </el-menu-item>
-        <el-menu-item index="/role">
-          <i class="el-icon-s-custom"></i>
-          <span>角色管理</span>
-        </el-menu-item>
-        <el-menu-item index="/menu">
-          <i class="el-icon-menu"></i>
-          <span>菜单管理</span>
-        </el-menu-item>
-      </el-menu-item-group>
-    </el-submenu>
-    <el-menu-item index="/dashboard">
-      <i class="el-icon-data-line"></i>
-      <span>数据报表</span>
-    </el-menu-item>
-    <el-menu-item index="/log">
-      <i class="el-icon-toilet-paper"></i>
-      <span>日志管理</span>
-    </el-menu-item>
+    </div>
   </el-menu>
 </template>
 
 <script>
+import {mapState} from 'vuex'
+import {LoadingWrapper} from '@/utils/common'
+
 export default {
   name: "AsideMenu",
   props: {
     isCollapse: {
       type: Boolean,
-      required: true,
+      required: true
+    }
+  },
+  computed: {
+    ...mapState(['treeMenu'])
+  },
+  watch: {
+    // 深度监听树形菜单的变化，发生变化执行load，需要避开加载就执行
+    treeMenu: {
+      handler() {
+        this.handleLoading();
+      },
+      deep: true
     },
   },
-  data() {
-    return {
-      
-    };
-  },
   methods: {
+    handleLoading() {
+      const load = LoadingWrapper({
+        text: '努力加载中',
+        target: this.$refs.elMenu.$el.children[1],
+        background: 'rgba(0,0,0, .6) !important'
+      })
+
+      load.close()
+    }
   },
 };
 </script>
@@ -77,11 +81,27 @@ export default {
   padding-left: 22px;
   height: 60px;
   font-size: 20px;
-  color: #f3f5f7;
-  border-bottom: 1px solid #e4e4e4;
+  color: #f5f5f5;
+  background-color: #5470c6;
+
+  .icon {
+    width: 22px;
+    height: 20px;
+    background-image: url("~@/assets/layout/layout_logo.png");
+    background-repeat: no-repeat;
+    background-size: 20px;
+  }
 
   span {
     font-size: 16px;
+  }
+}
+
+.aside_content {
+  flex: 1;
+
+  li i {
+    color: #eee;
   }
 }
 </style>
