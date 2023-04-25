@@ -1,10 +1,9 @@
-<p style="text-align: center">
+<p align="center">
     <img alt="" style="width: 120px;border-radius: 10px" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/resource/icon.png" />
 </p>
-<h1 style="margin: 30px 0 30px; font-weight: bold; text-align: center">网上求职与招聘系统</h1>
-<h4 style="text-align: center">基于SpringBoot+Vue2前后端分离的开发</h4>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">网上求职与招聘系统</h1>
+<h4 align="center">基于SpringBoot+Vue2前后端分离的开发</h4>
 
----
 # 开发文档
 
 ## 一、项目介绍
