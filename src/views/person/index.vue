@@ -1,8 +1,8 @@
 <template>
   <section class="person_container">
-    <el-row :gutter="10">
+    <el-row :gutter="20">
       <el-col :span="6">
-        <el-card class="person_info">
+        <el-card shadow="never" class="person_info">
           <div slot="header">
             <span>个人信息</span>
             <div v-if="!isFormEdit" class="fl_r command">
@@ -78,7 +78,7 @@
         </el-card>
       </el-col>
       <el-col :span="10">
-        <el-card header="基本信息" class="person_info_base">
+        <el-card shadow="never" header="基本信息" class="person_info_base">
           <el-form label-width="70px" label-position="left" :model="person" :disabled="!isFormEdit">
             <el-form-item label="个性签名">
               <el-input v-model="person.signature"></el-input>

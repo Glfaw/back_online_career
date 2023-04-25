@@ -4,6 +4,7 @@
     ref="elMenu"
     unique-opened
     text-color="#eee"
+    class="aside_menu_container"
     active-text-color="#409EFF"
     background-color="#304156"
     :collapse="isCollapse"
@@ -75,33 +76,41 @@ export default {
 </script>
 
 <style lang="less">
-.aside_logo {
+.aside_menu_container {
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  padding-left: 22px;
-  height: 60px;
-  font-size: 20px;
-  color: #f5f5f5;
-  background-color: #5470c6;
+  flex-flow: column nowrap;
+  height: 100vh;
+  border-right: unset;
 
-  .icon {
-    width: 22px;
-    height: 20px;
-    background-image: url("~@/assets/layout/layout_logo.png");
-    background-repeat: no-repeat;
-    background-size: 20px;
+  .aside_logo {
+    display: flex;
+    align-items: center;
+    padding-left: 22px;
+    height: 60px;
+    font-size: 20px;
+    color: #f5f5f5;
+    background-color: #5470c6;
+
+    .icon {
+      width: 22px;
+      height: 20px;
+      background-image: url("~@/assets/layout/layout_logo.png");
+      background-repeat: no-repeat;
+      background-size: 20px;
+    }
+
+    span {
+      font-size: 16px;
+    }
   }
 
-  span {
-    font-size: 16px;
-  }
-}
+  .aside_content {
+    flex: 1;
 
-.aside_content {
-  flex: 1;
-
-  li i {
-    color: #eee;
+    li i {
+      color: #eee;
+    }
   }
 }
 </style>

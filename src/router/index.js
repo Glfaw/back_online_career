@@ -28,43 +28,45 @@ export const setRoutes = function (){
   const treeMenu = store.state.treeMenu
   if (treeMenu === null) return false
 
-  const baseRoute = { path: '/', name: 'layout', component: () => import('@/views/layout'), redirect: '/home', children: [] }
-  treeMenu.forEach(menu => {
-    if (menu.path) {
-      baseRoute.children.push({
-        path: menu.path.replace('/', ''),
-        name: menu.path.replace('/', ''),
-        component: () => import(`@/views${menu.path}`),
-        meta: {
-          id: menu.id,
-          title: menu.name,
-          icon: menu.icon,
-          description: menu.description,
-          ordered: menu.ordered
-        }
-      })
-    } else if (menu.children?.length) {
-      menu.children.forEach(sub => {
-        if (sub.path) {
-          baseRoute.children.push({
-            path: sub.path.replace('/', ''),
-            name: sub.path.replace('/', ''),
-            component: () => import(`@/views${sub.path}`),
-            meta: {
-              id: sub.id,
-              title: sub.name,
-              icon: sub.icon,
-              description: sub.description,
-              ordered: sub.ordered
-            }
-          })
-        }
-      })
-    }
-  })
-
+  const baseRoute = { path: '/', name: 'layout', component: () => import('@/views/layout'), redirect: '/home', children: [
+    // 默认的子菜单...
+  ] }
   const current = router.getRoutes().map(r => r.name)
   if (!current.includes('layout')) {
+    treeMenu.forEach(menu => {
+      if (menu.path) {
+        baseRoute.children.push({
+          path: menu.path.replace('/', ''),
+          name: menu.path.replace('/', ''),
+          component: () => import(`@/views${menu.path}`),
+          meta: {
+            id: menu.id,
+            title: menu.name,
+            icon: menu.icon,
+            description: menu.description,
+            ordered: menu.ordered
+          }
+        })
+      } else if (menu.children?.length) {
+        menu.children.forEach(sub => {
+          if (sub.path) {
+            baseRoute.children.push({
+              path: sub.path.replace('/', ''),
+              name: sub.path.replace('/', ''),
+              component: () => import(`@/views${sub.path}`),
+              meta: {
+                id: sub.id,
+                title: sub.name,
+                icon: sub.icon,
+                description: sub.description,
+                ordered: sub.ordered
+              }
+            })
+          }
+        })
+      }
+    })
+
     router.addRoute(baseRoute)
     router.addRoute({
       path: '/:pathMatch(.*)*',
@@ -84,6 +86,9 @@ function beforeRoute(to, from, next) {
   //     next()
   //   }
   // }
+  if (!to.matched.length) {
+    store.state.treeMenu? next('/status/404'): next('/login')
+  }
   next()
 }
 

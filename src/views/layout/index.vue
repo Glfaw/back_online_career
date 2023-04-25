@@ -1,12 +1,12 @@
 <template>
   <el-container class="layout">
     <!--  侧边菜单  -->
-    <el-aside class="aside_container" :width="`${asideWidth}px`">
-      <aside-menu class="aside_menu" :isCollapse="isCollapse" />
+    <el-aside :width="`${asideWidth}px`">
+      <aside-menu :isCollapse="isCollapse" />
     </el-aside>
     <el-container>
       <!-- 头部区域 -->
-      <el-header>
+      <el-header style="background: linear-gradient(to left, #8c939d, #55585a);">
         <header-user :user="user" :isCollapse="isCollapse" :isLoading="isLoading" @changeCollapse="handleCollapseChange" />
       </el-header>
 
@@ -26,11 +26,12 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import {mapState} from 'vuex'
 import AsideMenu from "@/components/aside_menu"
 import HeaderUser from "@/components/header_user"
-import { ShowMsg, LoadingWrapper } from "@/utils/common"
-import { loadRouteMenu, loadPersonal } from "@/api/purview"
+import {ShowMsg} from "@/utils/common"
+import {loadPersonal} from "@/api/purview"
+import {setRoutes} from '@/router'
 
 export default {
   name: "Layout",
@@ -63,10 +64,11 @@ export default {
       Object.assign(this.user, data)
       this.user.token = token
       this.$store.commit('SET_USER', this.user)
-      this.$store.dispatch('loadMenus', this.user)
+      ShowMsg('用户信息更新成功', 'success')
     },
     refreshRouteMenu() {
-      this.reSetUser(this.user.id)
+      this.$store.dispatch('loadMenus', this.user)
+      setRoutes()
     },
     async reSetUser(id) {
       try {
@@ -89,15 +91,6 @@ export default {
     width: 100%;
   }
 
-  .aside_container {
-    .aside_menu {
-      display: flex;
-      flex-flow: column nowrap;
-      height: 100vh;
-      overflow: hidden;
-    }
-  }
-
   .el-card {
     .command {
       transform: translateY(-5px);
@@ -106,7 +99,7 @@ export default {
 
   .main_page {
     position: relative;
-    background-color: #F3F5F7;
+    background-color: #f3f3f3;
 
     .el-backtop {
       color: #fff;

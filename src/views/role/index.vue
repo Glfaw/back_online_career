@@ -23,11 +23,13 @@
     <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible" :before-close="menuDialogClose">
       <el-tree
         show-checkbox
+        check-strictly
         ref="menuTree"
         node-key="id"
         :data="menuData"
         :props="defaultProp"
-        :default-expanded-keys="expendMenu">
+        :default-expanded-keys="expendMenu"
+        @check="interLock">
         <div slot-scope="{ node, data }">
           <i :class="data.icon"></i>
           <span class="ml_5">{{ data.name }}</span>
@@ -42,7 +44,7 @@
 
     <el-row :gutter="20">
       <el-col :span="6">
-        <el-card header="搜索角色">
+        <el-card shadow="never" header="搜索角色">
           <el-form :model="formSearch">
             <el-form-item>
               <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model="formSearch.name"></el-input>
@@ -62,7 +64,7 @@
         </el-card>
       </el-col>
       <el-col :span="18">
-        <el-card header="角色列表">
+        <el-card shadow="never" header="角色列表">
           <el-table border stripe header-cell-class-name="table_header" v-loading="isTableLoading" :data="tableData">
             <el-table-column fixed prop="id" label="ID" width="50" align="center"></el-table-column>
             <el-table-column prop="name" label="角色名称" width="150"></el-table-column>
@@ -138,6 +140,17 @@ export default {
       this.roleDialogVisible = this.addOrUpdate = true;
       this.dialogForm = {...row}
     },
+    interLock({id, pid, children}, {checkedKeys}) {
+      if (pid && !checkedKeys.includes(pid)) {
+        checkedKeys.push(pid)
+      } else {
+        if (children && !checkedKeys.includes(id)) {
+          const childIds = children.map(v => v.id)
+          checkedKeys = checkedKeys.filter(v => !(new Set(childIds).has(v)))
+        }
+      }
+      this.$refs.menuTree.setCheckedKeys(checkedKeys)
+    },
     // 打开分配菜单对话框
     divideMenu: debounce(function(roleId) {
       this.menuDialogVisible = true
@@ -152,11 +165,11 @@ export default {
         const list = this.$refs.menuTree.getCheckedKeys()
         const res = await divideRoleMenu(this.divideRoleId, list)
         if (res.code === 200) {
-          ShowMsg('角色菜单分配成功', 'success')
           const tmp = this.divideRoleId
           const {roleId} = this.user
-          this.menuDialogClose()
           if (tmp === roleId) this.$emit('refreshRouteMenu')
+          this.menuDialogClose()
+          ShowMsg('角色菜单分配成功', 'success')
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')

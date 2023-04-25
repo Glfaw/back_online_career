@@ -38,7 +38,7 @@
       </div>
     </el-dialog>
 
-    <el-card>
+    <el-card shadow="never">
       <div slot="header">
         <span>菜单列表</span>
         <div class="command fl_r">
@@ -102,10 +102,11 @@ export default {
         if (res.code === 200) {
           ShowMsg('菜单删除成功', 'success')
           this.loadMenu()
-          this.$emit('refreshRouteMenu')
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')
+      } finally {
+        this.$emit('refreshRouteMenu')
       }
     },
     async handleEditMenu(menu) {

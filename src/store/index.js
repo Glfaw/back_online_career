@@ -54,6 +54,13 @@ const actions = {
     } catch (e) {
       notify('用户菜单-获取异常', e.message, 'error')
     }
+  },
+  // 退出登录
+  userLogOut(content) {
+    content.commit('SET_USER', null)
+    content.commit('SET_ROLES', null)
+    content.commit('SET_FIRMS', null)
+    content.commit('SET_MENUS', null)
   }
 }
 

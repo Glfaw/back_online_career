@@ -1,5 +1,5 @@
 <template>
-  <div class="header_user">
+  <div class="header_user_container">
     <div class="menu_toggle">
       <i :class="iconClass" @click="toggleBtn"></i>
       <el-breadcrumb class="ml_20 m_breadcrumb" separator="/">
@@ -9,8 +9,7 @@
     </div>
     <el-dropdown class="drop_menu" trigger="click" @command="handleCommand">
       <div class="card">
-        <el-avatar fit="contain" v-if="user&&user?.avatarUrl" shape="square" :size="30" :src="user.avatarUrl"></el-avatar>
-        <el-avatar v-else shape="square" :size="30">
+        <el-avatar shape="square" :size="36" :src="user?.avatarUrl">
           <i class="el-icon-picture-outline"></i>
         </el-avatar>
         <span class="name">{{ user? user.name: '未登录'}}</span>
@@ -88,11 +87,7 @@ export default {
           title: '已安全退出',
           message: '欢迎下次登录~',
         })
-
-        this.$store.commit('SET_USER', null)
-        this.$store.commit('SET_ROLES', null)
-        this.$store.commit('SET_FIRMS', null)
-        this.$store.commit('SET_MENUS', null)
+        this.$store.dispatch('userLogOut')
         this.$router.replace('/login');
       }).catch(() => ShowMsg('已取消退出', 'info'));
     }
@@ -101,11 +96,12 @@ export default {
 </script>
 
 <style lang="less">
-.header_user {
+.header_user_container {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   height: 100%;
+  color: #f3f5f7;
 
   .menu_toggle {
     flex: 1;
@@ -123,6 +119,13 @@ export default {
     .m_breadcrumb {
       vertical-align: middle;
       font-size: 16px;
+      .el-breadcrumb__inner {
+        color: #f3f5f7 !important;
+      }
+
+      .el-breadcrumb__separator {
+        color: #8c939d !important;
+      }
     }
   }
 
@@ -132,6 +135,7 @@ export default {
     .card {
       display: flex;
       align-items: center;
+      color: #f3f5f7;
 
       .name {
         margin-left: 10px;

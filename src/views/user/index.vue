@@ -3,7 +3,7 @@
     <el-row class="user_header" :gutter="20">
       <!-- 搜索区 -->
       <el-col :span="5">
-        <el-card class="card_search">
+        <el-card shadow="never" class="card_search">
           <span class="title" slot="header">搜索用户</span>
           <el-form
             class="user_search"
@@ -54,7 +54,7 @@
 
       <el-col :span="12">
         <!-- 编辑 or 修改区 -->
-        <el-card class="card_dialog">
+        <el-card shadow="never"class="card_dialog">
           <div slot="header">
             <span class="title">{{ isInsertOrUpdate? '新增用户': '编辑用户' }}</span>
             <div v-if="isInsertOrUpdate" class="fl_r command">
@@ -158,7 +158,7 @@
       
       <el-col :span="7">
         <!-- 时间卡片 -->
-        <el-card class="card_time">
+        <el-card shadow="never"class="card_time">
           <span class="title" slot="header">当前时间</span>
           <el-date-picker type="date" placeholder="选择日期" style="width: 100%;"></el-date-picker>
           <el-date-picker type="date" placeholder="选择日期" style="width: 100%;"></el-date-picker>
@@ -166,7 +166,7 @@
         </el-card>
 
         <!-- 功能区 -->
-        <el-card class="card_func mt_10">
+        <el-card shadow="never"class="card_func mt_10">
           <span class="title" slot="header">更多功能</span>
           <div class="func_area">
             <el-popconfirm title="是否执行批量删除?" cancel-button-text='我再想想' @confirm="handleRowsDel">
@@ -192,7 +192,7 @@
     </el-row>
 
     <!-- 数据列表 -->
-    <el-card class="card_tableData mt_20">
+    <el-card shadow="never"class="card_tableData mt_20">
       <div class="card_header" slot="header">
         <span class="title">用户列表</span>
         <!-- 我的分页 -->
