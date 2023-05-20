@@ -24,6 +24,13 @@ const router = new VueRouter({
   routes,
 });
 
+export const resetRoutes = function () {
+  router.matcher = new VueRouter({
+    mode: 'history',
+    routes,
+  });
+}
+
 export const setRoutes = function (){
   const treeMenu = store.state.treeMenu
   if (treeMenu === null) return false
@@ -68,24 +75,12 @@ export const setRoutes = function (){
     })
 
     router.addRoute(baseRoute)
-    router.addRoute({
-      path: '/:pathMatch(.*)*',
-      redirect: '/status/404'
-    })
   }
 }
 setRoutes()
 
 // 前置守卫逻辑
 function beforeRoute(to, from, next) {
-  // 判断是否已登录
-  // if(to.name == 'login' || to.name == 'home') next()
-  // else {
-  //   if(store.state.user?.token) next()
-  //   else {
-  //     next()
-  //   }
-  // }
   if (!to.matched.length) {
     store.state.treeMenu? next('/status/404'): next('/login')
   }

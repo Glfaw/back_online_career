@@ -8,7 +8,13 @@ module.exports = defineConfig({
         pathRewrite: {
           '^/api': ''
         },
-        ws: true,
+        changeOrigin: true
+      },
+      '/beauty': {
+        target: 'http://www.aichest.cn/juzi/api.php',
+        pathRewrite: {
+          '^/beauty': ''
+        },
         changeOrigin: true
       }
     }

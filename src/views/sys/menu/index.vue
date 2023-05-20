@@ -1,48 +1,10 @@
 <template>
   <section class="menu_container">
-    <el-dialog width="600px" title="菜单信息" :visible.sync="menuDialogVisible" :before-close="handleDialogClose">
-      <el-form style="padding: 0 30px 0" label-position="left" label-width="70px" :model="menuForm">
-        <el-form-item label="名称">
-          <el-input v-model="menuForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="路径">
-          <el-input v-model="menuForm.path"></el-input>
-        </el-form-item>
-        <el-form-item label="父级菜单">
-          <el-select v-model="menuForm.pid">
-
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <div slot="label">
-            <span class="mr_5">图标</span>
-            <i :class="menuForm.icon ?? 'el-icon-s-opportunity'"></i>
-          </div>
-          <el-select v-model="menuForm.icon" filterable clearable placeholder="请选择菜单图标" default-first-option>
-            <el-option v-for="dict in iconList" :key="dict.name" :label="dict.name" :value="dict.value">
-              <i :class="dict.value"></i>
-              <span class="ml_10">{{ dict.name }}</span>
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="menuForm.description"></el-input>
-        </el-form-item>
-        <el-form-item label="排序">
-          <el-input v-model="menuForm.ordered"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button @click="handleDialogClose">取 消</el-button>
-        <el-button type="primary" @click="saveMenu">确 定</el-button>
-      </div>
-    </el-dialog>
-
     <el-card shadow="never">
       <div slot="header">
         <span>菜单列表</span>
         <div class="command fl_r">
-          <el-button size="small" type="success" icon="el-icon-menu" @click="menuDialogVisible = true">添加菜单</el-button>
+          <el-button size="small" type="primary" icon="el-icon-menu" @click="menuDialogVisible = true">添加菜单</el-button>
         </div>
       </div>
       <el-table stripe row-key="id" :data="tableData" :tree-props="{children: 'children'}" v-loading="isTableLoading">
@@ -55,13 +17,13 @@
         <el-table-column prop="name" label="名称" width="120"></el-table-column>
         <el-table-column prop="path" label="路径" width="120"></el-table-column>
         <el-table-column prop="ordered" label="排序" width="80"></el-table-column>
-        <el-table-column prop="description" label="描述"></el-table-column>
+        <el-table-column prop="description" label="描述" show-overflow-tooltip></el-table-column>
         <el-table-column width="300" align="right">
           <template slot="header" slot-scope="scope">
             <el-input clearable size="small" prefix-icon="el-icon-menu" placeholder="输入菜单名称搜索" v-model.trim.lazy="menuName" @input="loadMenu"></el-input>
           </template>
           <template slot-scope="scope">
-            <el-button v-if="!scope.row.pid && !scope.row.path" size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="addChildNode(scope.row.id)">新增子菜单</el-button>
+            <el-button v-if="scope.row.pid === 0 && !scope.row.path" size="mini" type="success" icon="el-icon-circle-plus-outline" @click="addChildNode(scope.row.id)">新增子菜单</el-button>
             <el-button class="mr_10" size="mini" type="warning" icon="el-icon-edit" @click="handleEditMenu(scope.row)">编辑</el-button>
             <el-popconfirm title="确定要删除吗?" @confirm="handleRowDel(scope.row.id)">
               <el-button slot="reference" size="mini" type="danger" icon="el-icon-remove-outline">删除</el-button>
@@ -70,11 +32,53 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog width="600px" title="菜单信息" :visible.sync="menuDialogVisible" :close-on-click-modal="false" @close="handleDialogClose">
+      <el-form style="padding: 0 30px 0" label-position="left" label-width="70px" :model="menuForm">
+        <el-form-item label="名称">
+          <el-input clearable v-model.trim="menuForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="路径">
+          <el-input clearable v-model.trim="menuForm.path"></el-input>
+        </el-form-item>
+        <el-form-item label="父级菜单">
+          <el-select clearable filterable placeholder="设置父级菜单" v-model="menuForm.pid" :disabled="rootMenu.map(v => v.id).includes(menuForm.id)">
+            <el-option :value="0" label="暂不设置"></el-option>
+            <el-option v-for="item in rootMenu" :key="item.id" :value="item.id" :label="`${item.name}（ID: ${item.id}）`">
+              <span class="fl_l">{{ item.name }}（ID:{{ item.id }}）</span>
+              <span class="fl_r">{{ item.description }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <div slot="label">
+            <span class="mr_5">图标</span>
+            <i :class="menuForm.icon ?? 'el-icon-s-opportunity'"></i>
+          </div>
+          <el-select filterable clearable default-first-option placeholder="请选择菜单图标" v-model="menuForm.icon">
+            <el-option v-for="dict in iconList" :key="dict.name" :label="dict.name" :value="dict.value">
+              <i :class="dict.value"></i>
+              <span class="ml_10">{{ dict.name }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input clearable v-model.trim="menuForm.description"></el-input>
+        </el-form-item>
+        <el-form-item label="排序">
+          <el-input clearable v-model.number="menuForm.ordered"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button size="medium" type="info" @click="handleDialogClose">取 消</el-button>
+        <el-button size="medium" type="primary" @click="saveMenu">确 定</el-button>
+      </div>
+    </el-dialog>
   </section>
 </template>
 
 <script>
-import { throttle } from 'lodash'
+import { throttle, debounce } from 'lodash'
 import { ShowMsg } from "@/utils/common"
 import { getMenuList, searchMenu, updateMenu, addMenu, deleteMenu, getDictIcon } from "@/api/menu"
 
@@ -95,6 +99,11 @@ export default {
     this.loadMenu()
     this.loadIconList()
   },
+  computed: {
+    rootMenu() {
+      return this.tableData.filter(v => v.children || (v.pid == null && v.path == null))
+    }
+  },
   methods: {
     async handleRowDel(id) {
       try {
@@ -106,7 +115,7 @@ export default {
       } catch (e) {
         ShowMsg(e.message, 'error')
       } finally {
-        this.$emit('refreshRouteMenu')
+        this.$bus.$emit('refreshRouteMenu')
       }
     },
     async handleEditMenu(menu) {
@@ -136,19 +145,19 @@ export default {
         ShowMsg(e.message, 'error')
       }
     },
-    async saveMenu() {
+    saveMenu: debounce(async function() {
       try {
         const res = this.addOrUpdate ? await addMenu(this.menuForm): await updateMenu(this.menuForm)
         if (res.code === 200) {
           this.handleDialogClose()
           this.loadMenu()
-          this.$emit('refreshRouteMenu')
+          this.$bus.$emit('refreshRouteMenu')
           ShowMsg('菜单信息更新成功', 'success')
         } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')
       }
-    },
+    }, 200),
     loadMenu: throttle(async function() {
       this.isTableLoading = true
       try {

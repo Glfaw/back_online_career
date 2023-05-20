@@ -1,11 +1,11 @@
 import Vue from "vue";
 import Vuex from "vuex";
-
-import {getFirmList} from '@/api/user'
 import {getAllRoles} from "@/api/role"
 import {ShowNotify} from "@/utils/common"
 import {getItem, setItem} from '@/utils/storage'
 import {loadRouteMenu} from '@/api/purview'
+import {resetRoutes} from '@/router'
+import {getAllFirm} from '@/api/firm'
 
 Vue.use(Vuex);
 
@@ -36,7 +36,7 @@ const actions = {
   // 请求所有公司列表
   async loadFirms(content) {
     try {
-      const {code, data, msg} = await getFirmList()
+      const {code, data, msg} = await getAllFirm()
       code === 200
         ? content.commit('SET_FIRMS', data)
         : notify('企业列表-获取失败', msg)
@@ -46,6 +46,7 @@ const actions = {
   },
   // 加载菜单
   async loadMenus(content, user) {
+    resetRoutes()
     try {
       const {code, data, msg} = await loadRouteMenu(user)
       code === 200
@@ -61,6 +62,8 @@ const actions = {
     content.commit('SET_ROLES', null)
     content.commit('SET_FIRMS', null)
     content.commit('SET_MENUS', null)
+
+    resetRoutes()
   }
 }
 

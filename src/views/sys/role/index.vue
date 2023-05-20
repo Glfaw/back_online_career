@@ -1,56 +1,14 @@
 <template>
   <section class="role_container">
-    <!--  添加角色  -->
-    <el-dialog width="450px" title="角色信息" :visible.sync="roleDialogVisible" :before-close="roleDialogClose">
-      <el-form label-position="left" label-width="50px" :model="dialogForm">
-        <el-form-item label="名称">
-          <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model="dialogForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="标识">
-          <el-input clearable prefix-icon="el-icon-s-flag" placeholder="角色标识" v-model="dialogForm.flag"></el-input>
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input clearable prefix-icon="el-icon-info" placeholder="角色描述" v-model="dialogForm.description"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button @click="roleDialogClose">取 消</el-button>
-        <el-button type="primary" @click="handleRoleForm">确 定</el-button>
-      </div>
-    </el-dialog>
-
-    <!--  分配菜单  -->
-    <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible" :before-close="menuDialogClose">
-      <el-tree
-        show-checkbox
-        check-strictly
-        ref="menuTree"
-        node-key="id"
-        :data="menuData"
-        :props="defaultProp"
-        :default-expanded-keys="expendMenu"
-        @check="interLock">
-        <div slot-scope="{ node, data }">
-          <i :class="data.icon"></i>
-          <span class="ml_5">{{ data.name }}</span>
-        </div>
-      </el-tree>
-
-      <div slot="footer">
-        <el-button @click="menuDialogClose">取 消</el-button>
-        <el-button type="primary" @click="handleSaveMenu">确 定</el-button>
-      </div>
-    </el-dialog>
-
-    <el-row :gutter="20">
+    <el-row :gutter="10">
       <el-col :span="6">
         <el-card shadow="never" header="搜索角色">
           <el-form :model="formSearch">
             <el-form-item>
-              <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model="formSearch.name"></el-input>
+              <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model.trim="formSearch.name"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-input clearable prefix-icon="el-icon-s-flag" placeholder="角色标识" v-model="formSearch.flag"></el-input>
+              <el-input clearable prefix-icon="el-icon-s-flag" placeholder="角色标识" v-model.trim="formSearch.flag"></el-input>
             </el-form-item>
             <div class="handle">
               <el-button type="primary" icon="el-icon-search" @click="loadRoleTable">搜索</el-button>
@@ -69,7 +27,7 @@
             <el-table-column fixed prop="id" label="ID" width="50" align="center"></el-table-column>
             <el-table-column prop="name" label="角色名称" width="150"></el-table-column>
             <el-table-column prop="flag" label="角色标识" width="200"></el-table-column>
-            <el-table-column prop="description" label="角色描述"></el-table-column>
+            <el-table-column prop="description" label="角色描述" show-overflow-tooltip></el-table-column>
             <el-table-column label="操作" width="300" align="center">
               <template slot-scope="scope">
                 <el-button type="info" size="mini" icon="el-icon-menu" @click="divideMenu(scope.row.id)">分配菜单</el-button>
@@ -83,6 +41,48 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!--  添加角色  -->
+    <el-dialog width="450px" title="角色信息" :visible.sync="roleDialogVisible" :close-on-click-modal="false" @close="roleDialogClose">
+      <el-form label-position="left" label-width="50px" :model="dialogForm">
+        <el-form-item label="名称">
+          <el-input clearable prefix-icon="el-icon-s-custom" placeholder="角色名称" v-model.trim="dialogForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="标识">
+          <el-input clearable prefix-icon="el-icon-s-flag" placeholder="角色标识" v-model.trim="dialogForm.flag"></el-input>
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input clearable prefix-icon="el-icon-info" placeholder="角色描述" v-model.trim="dialogForm.description"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button size="medium" type="info" @click="roleDialogClose">取 消</el-button>
+        <el-button size="medium" type="primary" @click="handleRoleForm">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!--  分配菜单  -->
+    <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible" :close-on-click-modal="false" @close="menuDialogClose">
+      <el-tree
+        show-checkbox
+        check-strictly
+        ref="menuTree"
+        node-key="id"
+        :data="menuData"
+        :props="defaultProp"
+        :default-expanded-keys="expendMenu"
+        @check="interLock">
+        <div slot-scope="{ node, data }">
+          <i :class="data.icon"></i>
+          <span class="ml_5">{{ data.name }}</span>
+        </div>
+      </el-tree>
+
+      <div slot="footer">
+        <el-button size="medium" type="info" @click="menuDialogClose">取 消</el-button>
+        <el-button size="medium" type="primary" @click="handleSaveMenu">确 定</el-button>
+      </div>
+    </el-dialog>
   </section>
 </template>
 
@@ -167,7 +167,7 @@ export default {
         if (res.code === 200) {
           const tmp = this.divideRoleId
           const {roleId} = this.user
-          if (tmp === roleId) this.$emit('refreshRouteMenu')
+          if (tmp === roleId) this.$bus.$emit('refreshRouteMenu')
           this.menuDialogClose()
           ShowMsg('角色菜单分配成功', 'success')
         } else ShowMsg(res.msg)

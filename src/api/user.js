@@ -1,7 +1,22 @@
 import request from "@/utils/request"
+import axios from 'axios'
 /**
  * 用户管理模块
  */
+
+const beauty = axios.create({
+  baseURL: '/beauty',
+})
+
+export const getBeautyArr = () => {
+  return beauty({
+    method: 'GET',
+    params: {
+      db: 'json'
+    }
+  })
+}
+
 
 /**
  * 分页搜索
@@ -13,17 +28,6 @@ export const getPagination = params => {
     method: 'GET',
     url: '/user/pagination',
     params
-  })
-}
-
-/**
- * 获取所有公司列表
- * @returns {Promise<AxiosResponse<any>>}
- */
-export const getFirmList = () => {
-  return request({
-    method: 'GET',
-    url: '/user/firmList'
   })
 }
 
@@ -74,6 +78,14 @@ export const updateUser = data => {
   return request({
     method: 'PUT',
     url: '/user',
+    data
+  })
+}
+
+export const updatePwd = data => {
+  return request({
+    method: 'POST',
+    url: '/user/pwd',
     data
   })
 }

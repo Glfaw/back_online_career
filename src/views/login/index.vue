@@ -69,8 +69,8 @@ export default {
   data() {
     return {
       user: {
-        account: 906645272,
-        password: '123',
+        account: null,
+        password: '',
       },
       rules: {
         account: [

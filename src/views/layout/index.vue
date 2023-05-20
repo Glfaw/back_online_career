@@ -16,21 +16,19 @@
           <i class="el-icon-caret-top"></i>
         </el-backtop>
         <!-- 子路由出口 -->
-        <router-view
-          @refreshUser="reSetUser"
-          @refreshRouteMenu="refreshRouteMenu"
-        />
+        <router-view />
       </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
+import {debounce} from 'lodash'
 import {mapState} from 'vuex'
 import AsideMenu from "@/components/aside_menu"
 import HeaderUser from "@/components/header_user"
 import {ShowMsg} from "@/utils/common"
-import {loadPersonal} from "@/api/purview"
+import {loadPersonal, refreshPersonal} from "@/api/purview"
 import {setRoutes} from '@/router'
 
 export default {
@@ -40,7 +38,9 @@ export default {
     return {
       menu: [],
       isCollapse: false,
-      isLoading: false
+      isLoading: false,
+      currentID: null,
+      currentToken: null
     };
   },
   mounted() {
@@ -48,6 +48,24 @@ export default {
       this.$store.dispatch('loadRoles')
       this.$store.dispatch('loadFirms')
     }
+  },
+  created() {
+    const {id, token} = this.user
+    this.currentID = id
+    this.currentToken = token
+    // 绑定同步更新用户信息
+    this.$bus.$on('refreshUser', data => {
+      // 开始更新用户数据
+      this.handlePutUser(data)
+    })
+    // 绑定同步更新菜单信息
+    this.$bus.$on('refreshMenu', () => {
+      this.$store.dispatch('loadMenus', this.user)
+      setRoutes()
+    })
+  },
+  beforeDestroy() {
+    this.$bus.$off(['refreshUser', 'refreshMenu'])
   },
   computed: {
     ...mapState(['user']),
@@ -59,23 +77,34 @@ export default {
     handleCollapseChange() {
       this.isCollapse = !this.isCollapse;
     },
-    refreshUser(data) {
-      let token = this.user.token
+    toggleStorage(data) {
       Object.assign(this.user, data)
-      this.user.token = token
+      this.user.token = this.currentToken
       this.$store.commit('SET_USER', this.user)
       ShowMsg('用户信息更新成功', 'success')
     },
-    refreshRouteMenu() {
-      this.$store.dispatch('loadMenus', this.user)
-      setRoutes()
-    },
-    async reSetUser(id) {
+    async handlePutUser(user) {
       try {
-        const {code, data, msg} = await loadPersonal(id)
-        code === 200? this.refreshUser(data): ShowMsg(msg)
+        const res = await refreshPersonal(user)
+        if (res.code === 200) {
+          this.handleGetUser()
+        } else ShowMsg(res.msg)
       } catch (e) {
         ShowMsg(e.message, 'error')
+      }
+    },
+    async handleGetUser() {
+      let status = false
+      try {
+        const {code, data, msg} = await loadPersonal(this.currentID)
+        if (code === 200) {
+          status = true
+          this.toggleStorage(data)
+        } else ShowMsg(msg)
+      } catch (e) {
+        ShowMsg(e.message, 'error')
+      } finally {
+        this.$bus.$emit('refreshUserStatus', status)
       }
     },
   },
