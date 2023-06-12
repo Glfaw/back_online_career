@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="" style="width: 120px; border: 1px solid #e4e4e4; border-radius: 10px" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/resource/icon.png" />
+  <img style="width: 120px; border: 1px solid #e4e4e4; border-radius: 10px" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/resource/icon.png" />
 </p>
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">网上求职与招聘系统</h1>
 <h4 align="center">基于SpringBoot+Vue前后端分离的开发</h4>
@@ -38,38 +38,48 @@
 >
 > 角色：1、系统开发者；2、招聘者；3、求职者；
 
-<div style="display: grid; grid-template-columns: 50% 50%">
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/login.png" />
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/home.png" />
-</div>
+<table>
+  <tr>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/login.png" /></td>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/home.png" /></td>
+  </tr>
+</table>
 
 ### 2.2  角色模块
 
 > 系统所有角色的管理，角色信息的CRUD，以及为角色分配不同菜单的访问权限，属于系统超级管理员所有。
 
-<p style="display: grid; grid-template-columns: 50% 50%">
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/role_view.png" />
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/role_divide.png" />
-</p>
+<table>
+  <tr>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/role_view.png" /></td>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/role_divide.png" /></td>
+  </tr>
+</table>
 
 ### 2.3  菜单模块
 
 > 系统所有菜单的管理（除基本菜单，如404、登录），菜单信息的CRUD，菜单路径即路由组件路径，属于系统超级管理员所有。
 
-<p style="display: grid; grid-template-columns: 50% 50%">
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/menu_view.png" />
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/menu_add.png" />
-  <img alt="" style="grid-column: 1 / 2 span" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/menu_update.png" />
-</p>
+<table>
+  <tr>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/menu_view.png" /></td>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/menu_add.png" /></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/menu_update.png" /></td>
+  </tr>
+</table>
 
 ### 2.4  招聘信息模块
 
 > 该模块属于招聘管理员使用，切换招聘者用户（98938761），可对招聘信息的CRUD以及招聘信息类别的筛选。
 
-<p style="display: grid; grid-template-columns: 50% 50%">
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/career_view.png" />
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/career_update.png" />
-</p>
+<table>
+  <tr>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/career_view.png" /></td>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/career_update.png" /></td>
+  </tr>
+</table>
 
 ---
 
@@ -79,19 +89,23 @@
 
 > 在开发前期，由于第一次接触使用生疏，加上时间紧迫，思路：使用elementUI组件库中，将地图图层渲染到对话框组件中，在使用Element UI 中国省市区级联数据传给maploader中去定位到目的区域，再根据键盘输入自动提示与POI搜索，用户再选择心仪选项即可。
 
-<p style="display: grid; grid-template-columns: 50% 50%">
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/maploader.png" />
-  <img alt="" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/elm_pca.png" />
-</p>
+<table>
+  <tr>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/maploader.png" /></td>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/elm_pca.png" /></td>
+  </tr>
+</table>
 
 ### 3.2  整合移动端Vant组件库
 
 > 由于时间原因，前端页面交互未实现（PS：其实是去练车和写论文去了），布局的话界面预期是参考黑马头条移动端布局，参考图如下。
 
-<div style="display: flex">
-  <img alt="" style="width: 50%" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/vant_home.png" />
-  <img alt="" style="width: 50%" src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/vant_category.png" />
-</div>
+<table>
+  <tr>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/vant_home.png" /></td>
+    <td><img src="https://web-online-career.oss-cn-hangzhou.aliyuncs.com/document/vant_category.png" /></td>
+  </tr>
+</table>
 
 ---
 
