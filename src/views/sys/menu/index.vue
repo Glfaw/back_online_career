@@ -36,13 +36,13 @@
     <el-dialog width="600px" title="菜单信息" :visible.sync="menuDialogVisible" :close-on-click-modal="false" @close="handleDialogClose">
       <el-form style="padding: 0 30px 0" label-position="left" label-width="70px" :model="menuForm">
         <el-form-item label="名称">
-          <el-input clearable v-model.trim="menuForm.name"></el-input>
+          <el-input clearable placeholder="请输入菜单名称" v-model.trim="menuForm.name"></el-input>
         </el-form-item>
         <el-form-item label="路径">
-          <el-input clearable v-model.trim="menuForm.path"></el-input>
+          <el-input clearable placeholder="请输入菜单访问路径" v-model.trim="menuForm.path"></el-input>
         </el-form-item>
         <el-form-item label="父级菜单">
-          <el-select clearable filterable placeholder="设置父级菜单" v-model="menuForm.pid" :disabled="rootMenu.map(v => v.id).includes(menuForm.id)">
+          <el-select clearable filterable placeholder="设置父级菜单" v-model="menuForm.pid" :disabled="isAddChild || rootMenu.map(v => v.id).includes(menuForm.id)">
             <el-option :value="0" label="暂不设置"></el-option>
             <el-option v-for="item in rootMenu" :key="item.id" :value="item.id" :label="`${item.name}（ID: ${item.id}）`">
               <span class="fl_l">{{ item.name }}（ID:{{ item.id }}）</span>
@@ -63,10 +63,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="描述">
-          <el-input clearable v-model.trim="menuForm.description"></el-input>
+          <el-input clearable placeholder="请输入菜单说明" v-model.trim="menuForm.description"></el-input>
         </el-form-item>
         <el-form-item label="排序">
-          <el-input clearable v-model.number="menuForm.ordered"></el-input>
+          <el-input clearable placeholder="请设置菜单权重值" v-model.number="menuForm.ordered"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer">
@@ -92,7 +92,8 @@ export default {
       menuName: '',
       isTableLoading: false,
       menuDialogVisible: false,
-      addOrUpdate: true
+      addOrUpdate: true,
+      isAddChild: false
     }
   },
   created() {
@@ -101,7 +102,7 @@ export default {
   },
   computed: {
     rootMenu() {
-      return this.tableData.filter(v => v.children || (v.pid == null && v.path == null))
+      return this.tableData.filter(v => v.pid === 0 && !v.path)
     }
   },
   methods: {
@@ -125,11 +126,11 @@ export default {
     },
     handleDialogClose() {
       this.addOrUpdate = true
-      this.menuDialogVisible = false
+      this.menuDialogVisible = this.isAddChild = false
       this.menuForm = {}
     },
     addChildNode(pid) {
-      this.menuDialogVisible = true
+      this.menuDialogVisible = this.isAddChild = true
       this.menuForm = {}
       if (pid) {
         this.menuForm.pid = pid

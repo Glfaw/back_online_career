@@ -32,14 +32,16 @@ export const resetRoutes = function () {
 }
 
 export const setRoutes = function (){
+  let status = false
   const treeMenu = store.state.treeMenu
-  if (treeMenu === null) return false
+  if (treeMenu === null) return status
 
   const baseRoute = { path: '/', name: 'layout', component: () => import('@/views/layout'), redirect: '/home', children: [
     // 默认的子菜单...
   ] }
   const current = router.getRoutes().map(r => r.name)
   if (!current.includes('layout')) {
+    status = true
     treeMenu.forEach(menu => {
       if (menu.path) {
         baseRoute.children.push({
@@ -73,9 +75,9 @@ export const setRoutes = function (){
         })
       }
     })
-
     router.addRoute(baseRoute)
   }
+  return status
 }
 setRoutes()
 
@@ -88,7 +90,7 @@ function beforeRoute(to, from, next) {
 }
 
 // 后置守卫逻辑
-function afterRoute(to, from) {
+function afterRoute(to) {
   document.title = to.meta?.title || '我的后台'
 }
 

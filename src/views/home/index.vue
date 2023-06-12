@@ -1,6 +1,6 @@
 <template>
   <section class="home_container">
-    <h3 class="hello mb_10">欢迎您！{{user.name}}</h3>
+    <h3 class="hello mb_10">欢迎您！{{user?.name}}</h3>
     <p>{{text}}</p>
     <el-divider></el-divider>
     <el-row :gutter="20">

@@ -11,7 +11,7 @@
               <el-input clearable prefix-icon="" placeholder="请输入企业名称" v-model.trim="searchForm.name"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-input clearable prefix-icon="" placeholder="请输入企业所在区域，省、市、区" v-model.trim="searchForm.address"></el-input>
+              <el-input clearable prefix-icon="" placeholder="请输入企业所在地址" v-model.trim="searchForm.address"></el-input>
             </el-form-item>
             <el-form-item class="fl_r">
               <el-button size="medium" type="primary" icon="el-icon-search" @click="getFirmList">搜索</el-button>
@@ -187,7 +187,6 @@
 </template>
 
 <script>
-import MapLoader from '@/components/map_loader'
 import {throttle, debounce} from 'lodash'
 import {LoadingWrapper, ShowMsg, ShowNotify} from '@/utils/common'
 import {addFirm, deleteFirm, deleteFirmList, getPagination, updateFirm} from '@/api/firm'
@@ -197,7 +196,6 @@ import {getFirmTypeTree} from '@/api/category'
 
 export default {
   name: "FirmView",
-  // components: { MapLoader },
   data() {
     return {
       defaultProps: {

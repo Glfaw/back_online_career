@@ -79,7 +79,24 @@ export default {
         ],
         password: [{ required: true, message: "输入密码不能为空" }],
       },
+      logStatus: false
     };
+  },
+  watch: {
+    logStatus: {
+      handler(status) {
+        if (status) {
+          this.$router.push('/',() => {})
+          ShowNotify({
+            type: 'success',
+            title: '登录成功',
+            position: 'bottom-right',
+            message: '欢迎使用本系统~'
+          })
+        }
+      },
+      immediate: true
+    }
   },
   methods: {
     // 表单校验
@@ -102,19 +119,12 @@ export default {
         } else {
           this.$store.commit("SET_USER", data)
           this.$store.dispatch('loadMenus', data)
-          ShowNotify({
-            type: 'success',
-            title: '登录成功',
-            position: 'bottom-right',
-            message: '欢迎使用本系统~'
-          })
-          setRoutes()
-          this.$router.push("/").catch(() => true)
+          this.logStatus = setRoutes()
         }
       } catch (error) {
         ShowMsg(error.message, "error")
       }
-    }, 200),
+    }, 400, {leading: true}),
   },
 };
 </script>

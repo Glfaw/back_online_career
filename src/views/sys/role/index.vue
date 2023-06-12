@@ -30,7 +30,7 @@
             <el-table-column prop="description" label="角色描述" show-overflow-tooltip></el-table-column>
             <el-table-column label="操作" width="300" align="center">
               <template slot-scope="scope">
-                <el-button type="info" size="mini" icon="el-icon-menu" @click="divideMenu(scope.row.id)">分配菜单</el-button>
+                <el-button type="info" size="mini" icon="el-icon-menu" @click="divideMenu(scope.row)">分配菜单</el-button>
                 <el-button class="mr_10" type="warning" size="mini" icon="el-icon-edit" @click="handleRowUpdate(scope.row)">编辑</el-button>
                 <el-popconfirm title="确定要删除吗" @confirm="handleRowDel(scope.row.id)">
                   <el-button slot="reference" type="danger" size="mini" icon="el-icon-remove-outline">删除</el-button>
@@ -63,6 +63,9 @@
 
     <!--  分配菜单  -->
     <el-dialog width="450px" title="分配菜单" :visible.sync="menuDialogVisible" :close-on-click-modal="false" @close="menuDialogClose">
+      <span>当前角色：</span>
+      <el-tag size="medium" type="warning">{{ divideRoleName }}</el-tag>
+      <el-divider></el-divider>
       <el-tree
         show-checkbox
         check-strictly
@@ -107,6 +110,7 @@ export default {
       menuData: [],
       expendMenu: [],
       divideRoleId: null,
+      divideRoleName: null,
       addOrUpdate: false,
       roleDialogVisible: false,
       menuDialogVisible: false,
@@ -133,7 +137,7 @@ export default {
     },
     menuDialogClose() {
       this.menuDialogVisible = false
-      this.divideRoleId = null
+      this.divideRoleId = this.divideRoleName = null
       this.$refs.menuTree.setCheckedKeys([])
     },
     handleRowUpdate(row) {
@@ -152,9 +156,10 @@ export default {
       this.$refs.menuTree.setCheckedKeys(checkedKeys)
     },
     // 打开分配菜单对话框
-    divideMenu: debounce(function(roleId) {
+    divideMenu: debounce(function({name, id}) {
       this.menuDialogVisible = true
-      this.divideRoleId = roleId
+      this.divideRoleId = id
+      this.divideRoleName = name
 
       // 获取对应角色的菜单id
       this.$nextTick(this.handleGetRoleMenu)
